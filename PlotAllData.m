@@ -1,7 +1,7 @@
 function []= PlotAllData(data)
 
 % plots all channel
-
+figure
 if  size(data,2)==1    
     hold on
     plot(data(:,1)); 
