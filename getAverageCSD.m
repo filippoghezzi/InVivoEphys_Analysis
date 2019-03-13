@@ -10,7 +10,7 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
     eventEnd=eventEnd(eventStart>preEventTime); 
     eventStart=eventStart(eventStart>preEventTime);
 
-    maxEventDuration=max(eventEnd-eventStart+1);
+    maxEventDuration=max(eventEnd-eventStart);
 
     %% Preprocess data: Z-scoring, average channels 2-by-2, duplicate first and last channels
     data=zscore(data,[],2);
@@ -29,7 +29,7 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
         meanERP=zeros(size(data,1),maxEventDuration+preEventTime);
         
         for i=1:length(eventStart)
-            ERP=data(:,eventStart(i)-preEventTime:eventEnd(i));
+            ERP=data(:,eventStart(i)-preEventTime:eventStart(i)+maxEventDuration-1);
             meanERP=meanERP+ERP;    
         end
         meanERP=meanERP./length(eventStart);
@@ -85,10 +85,12 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
     %% Determine Layer 4
     if L4
         
+        figure('units','normalized','outerposition',[0 0 1 1]);
         imagesc(CSDinfo.rawCSD)
         hold on
         plot(CSDinfo.Source(:,2)+preEventTime,(1:16),'b')
         plot(CSDinfo.Sink(:,2)+preEventTime,(1:16),'r')
+        xlim([1000 2000])
         hold off
         
         opts.Resize='on';
@@ -100,36 +102,36 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
 end
 
 function [csdInfo] = getLayerData(csd,pre)
-    m = [];
-    i = [];
-    M = [];
-    I = [];
+    minV=[];
+    MinIdx=[];
+    maxV=[];
+    maxIdx=[];
 
     for j = 1:size(csd,1)
         
         %Min value in each channel (Source), from stimulus onset afterwards
-        [SourceVal,SourceIdx] = min(csd(j,pre+1:end));
+        [SourceVal,SourceIdx]=min(csd(j,pre+1:end));
         if isempty(SourceVal)
-            SourceVal = NaN;
-            SourceIdx = NaN;
+            SourceVal=NaN;
+            SourceIdx=NaN;
         end
-        m=[m;SourceVal(1)];
-        i=[i;SourceIdx(1)];
+        minV=[minV;SourceVal(1)];
+        MinIdx=[MinIdx;SourceIdx(1)];
        
         %Max value in each channel(Sink), from stimulus onset afterwards
-        [SinkVal,SinkIdx] = max(csd(j,pre+1:end));
+        [SinkVal,SinkIdx]=max(csd(j,pre+1:end));
         if isempty(SinkVal)
             SinkVal=NaN;
             SinkIdx=NaN;
         end
-        M=[M;SinkVal(1)];
-        I=[I;SinkIdx(1)];
+        maxV=[maxV;SinkVal(1)];
+        maxIdx=[maxIdx;SinkIdx(1)];
 
     end
     
     % Build output structure
     csdInfo.rawCSD=csd;
-    csdInfo.Source=[m,i];
-    csdInfo.Sink=[M,I];
+    csdInfo.Source=[minV,MinIdx];
+    csdInfo.Sink=[maxV,maxIdx];
 
 end
