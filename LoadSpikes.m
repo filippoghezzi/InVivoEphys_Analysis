@@ -2,11 +2,11 @@ function [spikes, templates, suid] = LoadSpikes(directory, ElectrodeMap)
 % Load spikes in directory
 % return a [spikeIds quality chan time] structure
 % 0=noise, 1=MUA, 2=Good, 3=unsorted)
-spikeTimes = readNPY(strcat(directory,'spike_times.npy'));
-spikeClusters = readNPY(strcat(directory,'spike_clusters.npy'));
-[cids, cgs]  = readClusterGroupsCSV(strcat(directory,'cluster_groups.csv'));
-templateId = readNPY(strcat(directory,'spike_templates.npy'));
-templates = readNPY(strcat(directory,'templates.npy'));
+spikeTimes = readNPY(fullfile(directory,'spike_times.npy'));
+spikeClusters = readNPY(fullfile(directory,'spike_clusters.npy'));
+[cids, cgs]  = readClusterGroupsCSV(fullfile(directory,'cluster_groups.csv'));
+templateId = readNPY(fullfile(directory,'spike_templates.npy'));
+templates = readNPY(fullfile(directory,'templates.npy'));
 [templateChan] = findBiggestTemplate(templates); % get biggest chan per template
 
 [~,actChan] = ismember(templateChan+16,ElectrodeMap);
