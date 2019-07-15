@@ -12,18 +12,17 @@ t=(-1000:1:5100);
     
     %%%%%%%% STILL TO OPTIMIZE THE NORMALIZATION OF THE
     %%%%%%%% CSD%%%%%%%%%%%%%%%%%%%%%%%%
-    cfs=abs(cfs);
+    cfs=abs(cfs).^2;
     ps_w=squeeze(mean(cfs,1));
     ps_w=ps_w./mean(ps_w(:,1:100),2);
     
-    
-    
-    
-    helperCWTTimeFreqPlot(log(ps_w),t,f,'surf')
+    imagesc(t,f,ps_w)
+    set(gca,'Ydir','normal')
+    xlim([-1000 5000]);
+    ylim([0 50])
+%     helperCWTTimeFreqPlot(ps_w,t,f,'image')
  
-    
-    
-    
+   
 
 
 
