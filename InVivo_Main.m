@@ -45,22 +45,22 @@ for i=1:height(tab)
     if ~any(dataPresence)
         [LFP]=loadLFPData(dataFolder,ElectrodeMap);
         save(fullfile(dataFolder,'LFP_Data.mat'),'LFP')
-    else
-        load(fullfile(dataFolder,'LFP_Data.mat'))
+%     else
+%         load(fullfile(dataFolder,'LFP_Data.mat'))
     end
     
-    %% Load spike data
-    [spikes,templates,suid]=LoadSpikes(fullfile(spikeFolder,tab.MouseID{i}),ElectrodeMap);
-    eventIdx=loadEventsForSpikes(dataFolder);
-    
-    %% Choose analysis
-    switch tab.Protocol{i}
-        case 'VisualFlash'
-            CSDinfo=eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray);
-            Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i))
-        case 'Baseline'
-            Baseline_Analysis(LFP.data,LFP.dataTime,LFP.eventArray)
-    end
+%     %% Load spike data
+%     [spikes,templates,suid]=LoadSpikes(fullfile(spikeFolder,tab.MouseID{i}),ElectrodeMap);
+%     eventIdx=loadEventsForSpikes(dataFolder);
+%     
+%     %% Choose analysis
+%     switch tab.Protocol{i}
+%         case 'VisualFlash'
+%             CSDinfo=eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray);
+%             Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i))
+%         case 'Baseline'
+%             Baseline_Analysis(LFP.data,LFP.dataTime,LFP.eventArray)
+%     end
     
 end
 
