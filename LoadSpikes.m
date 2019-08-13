@@ -4,7 +4,11 @@ function [spikes, templates, suid] = LoadSpikes(directory, ElectrodeMap)
 % 0=noise, 1=MUA, 2=Good, 3=unsorted)
 spikeTimes = readNPY(fullfile(directory,'spike_times.npy'));
 spikeClusters = readNPY(fullfile(directory,'spike_clusters.npy'));
-[clustersIDs, clustersGroups]  = readClusterGroupsCSV(fullfile(directory,'cluster_groups.csv')); %clusterIDs corresponds to unique(spikeClusters)
+if isfile(fullfile(directory,'cluster_groups.csv'))
+    [clustersIDs, clustersGroups]  = readClusterGroupsCSV(fullfile(directory,'cluster_groups.csv')); %clusterIDs corresponds to unique(spikeClusters)
+elseif isfile(fullfile(directory,'cluster_group.tsv'))
+    [clustersIDs, clustersGroups] = readClusterGroupsTSV(fullfile(directory,'cluster_group.tsv'));
+end
 templateId = readNPY(fullfile(directory,'spike_templates.npy'));
 templates = readNPY(fullfile(directory,'templates.npy'));
 [templateChan] = findBiggestTemplate(templates); % get biggest chan per template
@@ -17,6 +21,14 @@ templates = readNPY(fullfile(directory,'templates.npy'));
 [~,Quality] = ismember(spikeClusters,clustersIDs);
 % [~,ChIndex] = ismember(templateId+1,1:length(actChan));
 spikes = [spikeClusters clustersGroups(Quality)' actChan((templateId+1)') spikeTimes];
+
+
+%Remove too big spikes taller 1% to remove noise
+% amplitude=(readNPY(fullfile(directory,'amplitudes.npy')));
+% [cdf,bin] = histcounts(amplitude,'Normalization','cdf');
+% cutoff=bin(find(cdf>0.999,1,'first')); %in uV
+% spikes(amplitude>cutoff,2)=0;
+
 
 % Get sorted unit (su) ids
 su = find(spikes(:,2)==2);

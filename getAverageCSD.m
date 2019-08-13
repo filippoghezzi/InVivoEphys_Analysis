@@ -86,7 +86,8 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
     if L4
         
         figure('units','normalized','outerposition',[0 0 1 1]);
-        imagesc(CSDinfo.rawCSD)
+        imagesc(CSDinfo.rawCSD,[min(CSDinfo.rawCSD(:))/5,max(CSDinfo.rawCSD(:))/5])
+        colormap('jet')
         hold on
         plot(CSDinfo.Source(:,2)+preEventTime,(1:16),'b')
         plot(CSDinfo.Sink(:,2)+preEventTime,(1:16),'r')
@@ -98,6 +99,7 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
         opts.Interpreter = 'tex';
         L4channel=inputdlg('Enter L4 channel                                           \color{white} .','L4 in CSD',1,{'1-16'},opts);
         CSDinfo.L4=[str2num(L4channel{1}).*2-1,str2num(L4channel{1}).*2];
+        close
     end
 end
 

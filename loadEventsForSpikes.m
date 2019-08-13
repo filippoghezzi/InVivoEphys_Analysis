@@ -26,7 +26,6 @@ function outputEvents=loadEventsForSpikes(foldername)
         end
     end
     
-    %Output variable
     
     
     
