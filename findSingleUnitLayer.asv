@@ -1,0 +1,23 @@
+function sulayer=findSingleUnitLayer(spikes,folder)
+    
+
+
+    load(fullfile(folder,'CSDinfo.mat'))
+    
+    for unit=1:size(spikes.suid,1)
+        su=spikes.spikeTimes(ismember(spikes.spikeTimes(:,1),spikes.suid(unit)),:);
+        if ismember(su(1,3),CSDinfo.L4)
+            sulayer='L4';
+        elseif su(1,3)<min(CSDinfo.L4)
+            Layer='Ingrafranular';         
+        elseif su(1,3)>max(CSDinfo.L4)
+            Layer='Supragranular';         
+        end
+
+    end
+    
+    sulayer=[];
+    
+    
+    
+ 

@@ -3,7 +3,7 @@ function [LFP]=loadLFPData(foldername,ElectrodeMap)
 
     %% Load data and downsample
     j=1;
-    for i=min(ElectrodeMap):max(ElectrodeMap)
+    for i=max(ElectrodeMap):max(ElectrodeMap)
        [tmp,dataTime,~]=load_open_ephys_data_faster(strcat(foldername,'\100_CH',int2str(i),'.continuous'));
        tmp=tmp(1:20:end); %Downsampling to 1000 Hz
        data(j,:)=tmp';

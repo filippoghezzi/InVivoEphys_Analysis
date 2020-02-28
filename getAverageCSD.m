@@ -1,4 +1,4 @@
-function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrodeLength,electrodeSpacing,averageChannels,averageEvents,L4)
+function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrodeLength,electrodeSpacing,averageChannels,averageEvents,L4,mua,stimulus)
 % This function gets the interpolated CSD of average Events
     
     
@@ -12,6 +12,28 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
 
     maxEventDuration=max(eventEnd-eventStart);
 
+    %Plot eLFP
+    meanERP=zeros(size(data,1),maxEventDuration+preEventTime);
+        
+    for i=1:length(eventStart)
+        if ~(eventStart(i)+maxEventDuration-1 > size(data,2))
+            ERP=data(:,eventStart(i)-preEventTime:eventStart(i)+maxEventDuration-1);
+        end
+        meanERP=meanERP+ERP;    
+    end
+    meanERP=meanERP./length(eventStart);
+    
+    if L4
+        figure('units','normalized','outerposition',[0 0 1 1]);
+        subplot(1,3,1)
+        for channel=1:size(ERP,1)
+            plot(ERP(channel,:)-channel*200,'k')
+            hold on
+        end
+        hold off
+        xlim([1000 2000])
+    end
+    
     %% Preprocess data: Z-scoring, average channels 2-by-2, duplicate first and last channels
     data=zscore(data,[],2);
 
@@ -29,8 +51,10 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
         meanERP=zeros(size(data,1),maxEventDuration+preEventTime);
         
         for i=1:length(eventStart)
-            ERP=data(:,eventStart(i)-preEventTime:eventStart(i)+maxEventDuration-1);
-            meanERP=meanERP+ERP;    
+            if ~(eventStart(i)+maxEventDuration-1 > size(data,2))
+                ERP=data(:,eventStart(i)-preEventTime:eventStart(i)+maxEventDuration-1);
+            end
+            meanERP=meanERP+ERP;
         end
         meanERP=meanERP./length(eventStart);
 
@@ -59,7 +83,8 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
         meanER_CSD=zeros(size(csd,1),maxEventDuration+preEventTime);
         
         for i=1:length(eventStart)
-            ER_CSD=csd(:,eventStart(i)-preEventTime:eventEnd(i));
+            ER_
+            CSD=csd(:,eventStart(i)-preEventTime:eventEnd(i));
             meanER_CSD=meanER_CSD+ER_CSD;    
         end
         csd=meanER_CSD./length(eventStart);
@@ -85,7 +110,7 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
     %% Determine Layer 4
     if L4
         
-        figure('units','normalized','outerposition',[0 0 1 1]);
+        subplot(1,3,2)
         imagesc(CSDinfo.rawCSD,[min(CSDinfo.rawCSD(:))/5,max(CSDinfo.rawCSD(:))/5])
         colormap('jet')
         hold on
@@ -93,6 +118,23 @@ function [interp_csd,CSDinfo]=getAverageCSD(data,eventTime,preEventTime,electrod
         plot(CSDinfo.Sink(:,2)+preEventTime,(1:16),'r')
         xlim([1000 2000])
         hold off
+        
+
+        subplot(1,3,3)
+        k=1;
+        for i=1:2:32
+            muaTimes=[]; 
+            for j=1:size(stimulus,1)
+                tmpmua = mua(ismember(mua(:,3),[i,i+1]),:);
+                tmpSpikes=tmpmua(:,4)-stimulus(j,1);
+                muaTimes=[muaTimes;tmpSpikes(tmpSpikes>0&tmpSpikes<20000)];
+            end
+            muaTimes=double(muaTimes)./20; % Convert to double and divide by 20 to get time in ms
+            [eventRelatedMUA(k,:),~]=histcounts(muaTimes,600);
+            k=k+1;
+        end
+        imagesc(eventRelatedMUA)
+        
         
         opts.Resize='on';
         opts.WindowStyle='normal';

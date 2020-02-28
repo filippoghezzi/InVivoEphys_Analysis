@@ -1,7 +1,15 @@
 function [spikes, templates, suid] = LoadSpikes(directory, ElectrodeMap)
 % Load spikes in directory
-% return a [spikeIds quality chan time] structure
-% 0=noise, 1=MUA, 2=Good, 3=unsorted)
+% Inputs: 
+%    directory -> where kilosort and phy data are stored;
+%    ElectrodeMap -> map of electrode used.
+% Outputs:
+%   spikes -> matrix of the form [spikeCluster clusterGroup channel spikeTime];
+%   clusterGroups is 0=noise, 1=MUA, 2=Good, 3=unsorted
+%   templates ->
+%   suid -> single unit IDs.
+
+%Spikes and clusters
 spikeTimes = readNPY(fullfile(directory,'spike_times.npy'));
 spikeClusters = readNPY(fullfile(directory,'spike_clusters.npy'));
 if isfile(fullfile(directory,'cluster_groups.csv'))
@@ -9,25 +17,18 @@ if isfile(fullfile(directory,'cluster_groups.csv'))
 elseif isfile(fullfile(directory,'cluster_group.tsv'))
     [clustersIDs, clustersGroups] = readClusterGroupsTSV(fullfile(directory,'cluster_group.tsv'));
 end
-templateId = readNPY(fullfile(directory,'spike_templates.npy'));
+[~,Quality] = ismember(spikeClusters,clustersIDs); %Take index of clusterId when spikeClusters is represented in clustersIDs; Quality is a vector (nspike,1)
+clusterGroups=clustersGroups(Quality)';
+
+%Templates
+spikeTemplates = readNPY(fullfile(directory,'spike_templates.npy'));
 templates = readNPY(fullfile(directory,'templates.npy'));
-[templateChan] = findBiggestTemplate(templates); % get biggest chan per template
-
-[~,actChan] = ismember(templateChan+16,ElectrodeMap); %act stands for actual channels with 1 top channel and 32 bottom channel
-
-% templateId(templateId==0) = 1; % remove zero ones hopefully they coincide with noise templates
+[templateChannel] = findBiggestTemplate(templates); % get biggest chan per template
+[~,actChan] = ismember(templateChannel+16,ElectrodeMap); %act stands for actual channels with 1 top channel and 32 bottom channel
+channel=actChan((spikeTemplates+1)');
 
 
-[~,Quality] = ismember(spikeClusters,clustersIDs);
-% [~,ChIndex] = ismember(templateId+1,1:length(actChan));
-spikes = [spikeClusters clustersGroups(Quality)' actChan((templateId+1)') spikeTimes];
-
-
-%Remove too big spikes taller 1% to remove noise
-% amplitude=(readNPY(fullfile(directory,'amplitudes.npy')));
-% [cdf,bin] = histcounts(amplitude,'Normalization','cdf');
-% cutoff=bin(find(cdf>0.999,1,'first')); %in uV
-% spikes(amplitude>cutoff,2)=0;
+spikes = [spikeClusters clusterGroups channel spikeTimes]; %OUTPUT
 
 
 % Get sorted unit (su) ids
@@ -38,7 +39,7 @@ templatesT = [];
 for i = 1:length(suid)
     
     a = find(spikes(:,1)==suid(i),1,'first');
-    templatesT(i,:) = templates(templateId(a)+1,:,templateChan(templateId(a)+1));    
+    templatesT(i,:) = templates(spikeTemplates(a)+1,:,templateChannel(spikeTemplates(a)+1));    
 end
 
 templates = templatesT;

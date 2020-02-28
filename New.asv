@@ -1,0 +1,45 @@
+clear 
+close all
+clc
+
+data=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo_SST;Ai32.csv'); 
+spikeFolder='C:\Users\Butt Lab\Documents\SpikeSorting';
+load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\A1x32_Map.mat');
+
+data=data(data.Use~=0,:);
+data=loadSampleDuration(data,spikeFolder);
+
+recToAnalyse=unique(data.MouseID);
+for recording=22:length(recToAnalyse)
+    if ~isempty(data(strcmp(data.MouseID,recToAnalyse{recording}),:))
+        doAnalysis(data(strcmp(data.MouseID,recToAnalyse{recording}),:),ElectrodeMap,spikeFolder);
+    end  
+end
+
+function doAnalysis(tab,ElectrodeMap,spikeFolder)
+    savingFolder=tab.Folder{1};
+    [spike.spikeTimes,spike.templates,spike.suid]=LoadSpikes(fullfile(spikeFolder,tab.MouseID{1}),ElectrodeMap);
+    spike.suLayer=findSingleUnitLayer(spike,savingFolder);
+    [~,~,~,sr]=loadEventsForSpikes(fullfile(tab.Folder{1},tab.Experiment{1}));
+    load(fullfile(savingFolder,'Stimuli.mat'))
+ 
+               
+        
+%         condition={'Laser','LED','Combined'}; 
+
+            rasterWindow=[1,5];
+            binSize=0.03;
+            
+            for condition=size(stimuli,2)
+                [PSTH,PSTHbins,raster]=makePSTHandRaster(spike.spikeTimes,spike.suid,stimuli.Visual,sr,rasterWindow,binSize);
+              plotRaster(raster)
+              plotPSTH(PSTH,PSTHbins)
+%               findVisualResponsiveUnits(raster)
+            end
+            
+        
+        
+        
+        
+        
+    end

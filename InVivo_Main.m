@@ -9,10 +9,11 @@ clear
 close all
 clc
 
-load('InVivo_V1_SST;Ai32.mat')
+tab=readtable('V1_In Vivo_SST;Ai32.csv');
 
 spikeFolder='C:\Users\Butt Lab\Documents\SpikeSorting';
 load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\A1x32_Map.mat');
+tab=tab(tab.Use~=0,:);
 
 %%%temporary
 % tab=tab(tab.Temp==1,:);
@@ -24,6 +25,7 @@ tab.SampleLength(1,1)=0;
 tab.startSample(1,1)=0;
 tab.endSample(1,1)=0;
 for i=1:max(unique(tab.RecID))
+% for i=1:8
     if ~isempty(tab(tab.RecID==i,:))
         load(fullfile(spikeFolder,tab(tab.RecID==i,:).MouseID{1},'SampleDuration.mat'))
         tab(tab.RecID==i,:).SampleLength=samplesToSave;
@@ -37,23 +39,27 @@ for i=1:max(unique(tab.RecID))
             end
         end
     end
-    
 end
 tab = removevars(tab,{'SampleLength','endSample'});
 
-
-% for i=1:max(unique(tab.RecID))
-for i=8:12
+AllSingleUnits = table;
+% for i=8:max(unique(tab.RecID))
+for i=6
     if ~isempty(tab(tab.RecID==i,:))
-        Analysis_SingleAnimal(tab(tab.RecID==i,:),ElectrodeMap,spikeFolder);
+        [SingleUnits ,CSDinfo ]= Analysis_SingleAnimal(tab(tab.RecID==i,:),ElectrodeMap,spikeFolder);
     end
+    save(fullfile(tab(tab.RecID==i,:).Folder{1},'CSDinfo.mat'),'CSDinfo')
 end
 
+% save('SU2.mat','AllSingleUnits')
+
 %% Main data analysis
-function Analysis_SingleAnimal(tab,ElectrodeMap,spikeFolder)
+function [SingleUnits, CSDinfo] = Analysis_SingleAnimal(tab,ElectrodeMap,spikeFolder)
     savingFolder=tab.Folder{1};
     
     optotaggingSession=1;
+    visualSession=1;
+    baselineSession=1;
     tab=sortrows(tab,'Use');
     [spikes,templates,suid]=LoadSpikes(fullfile(spikeFolder,tab.MouseID{1}),ElectrodeMap);
 
@@ -79,45 +85,51 @@ function Analysis_SingleAnimal(tab,ElectrodeMap,spikeFolder)
         %% Choose analysis
         switch tab.Protocol{i}
             case 'VisualFlash'
-                CSDinfo=eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray,0,[],'LED');
+                suModV(size(suid,1),visualSession)=0;
+                CSDinfo=eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray,0,[],'LED', spikes(ismember(spikes(:,2),[1,2]),:), eventIdx,tab.startSample(i));
                 figname=strcat(tab.MouseID{i},'- P',int2str(tab.Age(i)),' - Visual Flash LFP - Laser OFF - 1');
                 sgtitle(figname)
-                Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i),0,savingFolder,figname)
+                [suModV, PSTH] = Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i),0,savingFolder,figname,suModV,visualSession);
                 figname=strcat(tab.MouseID{i},'- P',int2str(tab.Age(i)),' - Visual Flash Units - Laser OFF - 1');
                 sgtitle(figname)
                 export_fig(fullfile(savingFolder,figname),'-tiff','-transparent')
                 close
+                visualSession=visualSession+1;
             case 'VisualFlash_Opto'
-                CSDinfo=eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray,0,[],'LED');
+                suModV(size(suid,1),visualSession)=0;
+                suModI(size(suid,1),baselineSession)=0;
+                CSDinfo=eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray,0,[],'LED', spikes(ismember(spikes(:,2),[1,2]),:),eventIdx,tab.startSample(i));
                 figname=strcat(tab.MouseID{i},' - P',int2str(tab.Age(i)),' - Visual Flash LFP - Laser OFF');
                 sgtitle(figname)
-                Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i),0,savingFolder,figname)
+                [suModV, PSTH] = Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i),0,savingFolder,figname,suModV,visualSession);
                 figname=strcat(tab.MouseID{i},' - P',int2str(tab.Age(i)),' - Visual Flash Units - Laser OFF');
                 sgtitle(figname)
                 export_fig(fullfile(savingFolder,figname),'-tiff','-transparent')
                 close
-                eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray,1,CSDinfo,'LED');
+                eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray,1,CSDinfo,'LED', spikes(ismember(spikes(:,2),[1,2]),:),eventIdx,tab.startSample(i));
                 figname=strcat(tab.MouseID{i},' - P',int2str(tab.Age(i)),' - Visual Flash LFP - Laser ON');
                 sgtitle(figname)
-                Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i),1,savingFolder,figname)
+                [suModI, ~] = Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i),1,savingFolder,figname,suModI,baselineSession);
                 figname=strcat(tab.MouseID{i},' - P',int2str(tab.Age(i)),' - Visual Flash Units - Laser ON');
                 sgtitle(figname)
                 export_fig(fullfile(savingFolder,figname),'-tiff','-transparent')
                 close
             case 'Baseline'
-                Baseline_Analysis(LFP.data,LFP.dataTime,LFP.eventArray)
+%                 Baseline_Analysis(LFP.data,LFP.dataTime,LFP.eventArray)
             case 'Baseline_Opto'
-                eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray,1,CSDinfo,'Laser');
+                suModI(size(suid,1),baselineSession)=0;
+                eLFP_Analysis(LFP.data,LFP.dataTime,LFP.eventArray,1,CSDinfo,'Laser', spikes(ismember(spikes(:,2),[1,2]),:),eventIdx,tab.startSample(i));
                 figname=strcat(tab.MouseID{i},' - P',int2str(tab.Age(i)),' - LFP Laser only');
                 sgtitle(figname)
-                Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i),1,savingFolder,figname)
+                [suModI, ~] = Spike_Analysis(spikes,templates,suid,eventIdx,CSDinfo.L4,tab.startSample(i),1,savingFolder,figname,suModI,baselineSession);
                 figname=strcat(tab.MouseID{i},' - P',int2str(tab.Age(i)),' - Units Laser only');
                 sgtitle(figname)
                 export_fig(fullfile(savingFolder,figname),'-tiff','-transparent')
                 close
+                baselineSession =baselineSession +1;
             case 'Optotagging'
-                suMod(size(suid,1),optotaggingSession)=0;
-                suid=Optotagging_Analysis(spikes,templates,suid,eventIdx,tab.startSample(i),optotaggingSession,suMod,CSDinfo.L4);
+                suModO(size(suid,1),optotaggingSession)=0;
+                suModO=Optotagging_Analysis(spikes,templates,suid,eventIdx,tab.startSample(i),optotaggingSession,suModO,CSDinfo.L4);
                 figname=strcat(tab.MouseID{i},' - P',int2str(tab.Age(i)),' - Optotagging',int2str(optotaggingSession));
                 sgtitle(figname)
                 export_fig(fullfile(savingFolder,figname),'-tiff','-transparent')
@@ -128,10 +140,23 @@ function Analysis_SingleAnimal(tab,ElectrodeMap,spikeFolder)
         end
 
     end
+    
+    suModO = sum(suModO,2);
+    suModV = sum(suModV,2);
+    suModI = sum(suModI,2);
+    
+    SingleUnits = table;
+    SingleUnits.ID = suid;
+    SingleUnits.Optotagging = suModO;
+    SingleUnits.VisualResponsive = suModV;
+    SingleUnits.Inhibited = suModI;
+    SingleUnits.STH = PSTH;
+    SingleUnits.Mouse(:) = tab.MouseID(1);    
+    
 end
 
 %% Analysis functions
-function Spike_Analysis(spikes,templates,suid,eventIdx,L4,start,opto,savingFolder,figname)
+function [suModV, PSTH] = Spike_Analysis(spikes,templates,suid,eventIdx,L4,start,opto,savingFolder,figname,suModV,session)
 %% Plot multi unit activity histogram
     mua=spikes(ismember(spikes(:,2),[1,2]),:); % Select both single units and multi units
     mua=mua(ismember(mua(:,3),L4),:); % Only in Layer 4
@@ -185,13 +210,16 @@ function Spike_Analysis(spikes,templates,suid,eventIdx,L4,start,opto,savingFolde
             Layer='Supragranular';         
         end
         subplot(7,8,i)
+        tempPSTH = [];
         for j=1:size(stimulus,1)
             tmpSu=su(:,4)-stimulus(j);
-            raster(j)={tmpSu(tmpSu>-20000&tmpSu<5*20000)};
-            raster{j}=double(raster{j})./20;
-            scatter(raster{j},ones(size(raster{j},1),1)*j,'.k')
-            hold on      
+            raster(i,j)={tmpSu(tmpSu>-20000&tmpSu<5*20000)};
+            raster{i,j}=double(raster{i,j})./20;            
+            scatter(raster{i,j},ones(size(raster{i,j},1),1)*j,'.k')
+            hold on 
+            tempPSTH = [tempPSTH;raster{i,j}]; 
         end
+        PSTH(i,1)={tempPSTH};
         if ~isempty(eventIdx{3}) 
             patch([0 100 100 0],[0 0 50 50],'y','FaceAlpha',.3,'EdgeColor','none')
         end
@@ -206,11 +234,68 @@ function Spike_Analysis(spikes,templates,suid,eventIdx,L4,start,opto,savingFolde
         ax.YTick=[];
         ax.YAxis.Color='none'; 
         box off
-
+        
+        %Find responsive units
+        if ~opto
+            pre=@(x) nnz(x>-100&x<0);
+            post=@(x) nnz(x>1&x<100);
+        
+            isResponsive(:,1)=cellfun(pre,raster(i,:))';
+            isResponsive(:,2)=cellfun(post,raster(i,:))';
+        
+            [~,p]=ttest(isResponsive(:,1),isResponsive(:,2));
+            if p<=0.05 && sum(isResponsive(:,2))>size(isResponsive,1)*.3       
+                if sum(isResponsive(:,2))>sum(isResponsive(:,1))
+                    suModV(i,session)=1;
+                else
+%                     suModV(i,session)=2;
+                end    
+            end
+            title(strcat('N',int2str(suid(i,1)),' -',Layer,' - Group:',int2str(suModV(i,session))),'FontSize',12)
+        
+        elseif opto
+            pre=@(x) nnz(x>-250&x<-50);
+            post=@(x) nnz(x>-50&x<150);
+        
+            isInhibited(:,1)=cellfun(pre,raster(i,:))';
+            isInhibited(:,2)=cellfun(post,raster(i,:))';
+        
+            [~,p]=ttest(isInhibited(:,1),isInhibited(:,2));
+            if p<=0.05 && sum(isInhibited(:,1))>size(isInhibited,1)*.3       
+                if sum(isInhibited(:,1))>sum(isInhibited(:,2))
+                    suModV(i,session)=1;
+                else
+%                     suModV(i,session)=2;
+                end    
+            end
+            title(strcat('N',int2str(suid(i,1)),' -',Layer,' - Group:',int2str(suModV(i,session))),'FontSize',12) 
+            
+        end
+        
     end
 end
 
-function CSDinfo=eLFP_Analysis(data,dataTime,eventArray,opto,CSDinfo,alignTrials)
+function CSDinfo=eLFP_Analysis(data,dataTime,eventArray,opto,CSDinfo,alignTrials, mua,eventIdx,start)
+    %Event for spikes, used for MUA
+    %% Find events with laser ON or OFF
+    if ~isempty(eventIdx{1})
+        if ~isempty(eventIdx{3}) %Case both laser and LED
+            for i=1:size(eventIdx{3},1)
+                LaserON(i,1)=any(eventIdx{3}(i,1)-eventIdx{1}(:,1)==1000);
+            end
+            if opto
+                stimulus=eventIdx{3}(LaserON,:)+start;
+            else
+                stimulus=eventIdx{3}(~LaserON,:)+start;
+            end
+        else %Case laser only
+            stimulus=eventIdx{1}+start; %3 for LED
+        end
+    else %Case LED only
+        stimulus=eventIdx{3}+start; %3 for LED
+    end
+    
+
     %% Current source density
     LED=3;          %3, index of eventArray line for LED visual stimulation;
     laser=1;        %1, index of eventArray line for 470nm laser;
@@ -234,9 +319,9 @@ function CSDinfo=eLFP_Analysis(data,dataTime,eventArray,opto,CSDinfo,alignTrials
     end
 
     if opto
-        [CSD,~]=getAverageCSD(data,[stimuliIdx(:,1) stimuliIdx(:,2)+5100],1000,800,25,1,1,0);
+        [CSD,~]=getAverageCSD(data,[stimuliIdx(:,1) stimuliIdx(:,2)+5100],1000,800,25,1,1,0, mua,stimulus);
     else
-        [CSD,CSDinfo]=getAverageCSD(data,[stimuliIdx(:,1) stimuliIdx(:,2)+5100],1000,800,25,1,1,1);
+        [CSD,CSDinfo]=getAverageCSD(data,[stimuliIdx(:,1) stimuliIdx(:,2)+5100],1000,800,25,1,1,1, mua,stimulus);
     end
 
     %% Evoked LFP
@@ -313,7 +398,7 @@ function Baseline_Analysis(data,dataTime,eventArray)
 
 end
 
-function suid=Optotagging_Analysis(spikes,templates,suid,eventIdx,start,session,suMod,L4)
+function suModO=Optotagging_Analysis(spikes,templates,suid,eventIdx,start,session,suModO,L4)
     %% this function create the variable suMod with columns (one per session) with optotagging modulation in which 0=no modulation; 1=excitation (e.g.tagged units); 2=inhibition.
     laser=eventIdx{1}+start;
 
@@ -357,17 +442,17 @@ function suid=Optotagging_Analysis(spikes,templates,suid,eventIdx,start,session,
         isTagged(:,3)=cellfun(post,raster(i,:))';
 
         [p,~,stats]=anova1(isTagged,[],'off');
-        if p<=0.05        
+        if p<=0.05      
            c=multcompare(stats,'Display','off');
            if c(1,6)<0.05 && c(3,6)<0.05
-               if sum(isTagged(:,2))>sum(isTagged(:,1)) && sum(isTagged(:,2))>sum(isTagged(:,3))
-                   suMod(i,session)=1;
-               else%if sum(isTagged(:,1))>sum(isTagged(:,2)) && sum(isTagged(:,3))>sum(isTagged(:,2))
-                   suMod(i,session)=2;
+               if sum(isTagged(:,2))>sum(isTagged(:,1)) && sum(isTagged(:,2))>sum(isTagged(:,3)) && sum(isTagged(:,2))>size(isTagged,1)*.2    %Higher than pre and post and spiking 30% of the trials
+                   suModO(i,session)=1;
                end
+%            elseif c(1,6)<0.05 && sum(isTagged(:,1))>size(isTagged,1)*.3
+%                suModO(i,session)=2;
            end
         end
-        title(strcat('N',int2str(suid(i,1)),' -',Layer,' - Group:',int2str(suMod(i,session))),'FontSize',12)
+        title(strcat('N',int2str(suid(i,1)),' -',Layer,' - Group:',int2str(suModO(i,session))),'FontSize',12)
 
         
     end
