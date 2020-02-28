@@ -11,20 +11,26 @@ data=loadSampleDuration(data,spikeFolder);
 
 recToAnalyse=unique(data.MouseID);
 allPSTH=[];
+layer=[];
+age=[];
+
 for recording=1:length(recToAnalyse)
     if ~isempty(data(strcmp(data.MouseID,recToAnalyse{recording}),:))
-        PSTH=doAnalysis(data(strcmp(data.MouseID,recToAnalyse{recording}),:),ElectrodeMap,spikeFolder);
+        [PSTH,spike]=doAnalysis(data(strcmp(data.MouseID,recToAnalyse{recording}),:),ElectrodeMap,spikeFolder);
     end  
     allPSTH=[allPSTH;PSTH];
+    layer=[layer;spike.suLayer];
+    age=[age;spike.age];
 end
 
 doClustering(allPSTH);
 
 
-function PSTH=doAnalysis(tab,ElectrodeMap,spikeFolder)
+function [PSTH,spike]=doAnalysis(tab,ElectrodeMap,spikeFolder)
     savingFolder=tab.Folder{1};
     [spike.spikeTimes,spike.templates,spike.suid]=LoadSpikes(fullfile(spikeFolder,tab.MouseID{1}),ElectrodeMap);
     if ~isempty(spike.suid)
+        spike.age=ones(size(spike.suid,1),1)*tab.Age(1);
         spike.suLayer=findSingleUnitLayer(spike,savingFolder);
         [~,~,~,sr]=loadEventsForSpikes(fullfile(tab.Folder{1},tab.Experiment{1}));
         load(fullfile(savingFolder,'Stimuli.mat'))
@@ -37,5 +43,8 @@ function PSTH=doAnalysis(tab,ElectrodeMap,spikeFolder)
 %               findVisualResponsiveUnits(raster)   
     else
         PSTH=[];
+        spike.suLayer=[];
+        spike.age=[];
+        
     end
 end
