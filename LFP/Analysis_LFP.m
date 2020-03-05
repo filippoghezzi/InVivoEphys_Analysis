@@ -3,8 +3,6 @@ close all
 clc
 
 tab=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo_SST;Ai32.csv'); 
-
-
 load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\A1x32_Map.mat');
 tab=tab(tab.Use~=0,:);
 spikeFolder='C:\Users\Butt Lab\Documents\SpikeSorting';

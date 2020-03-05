@@ -6,8 +6,9 @@ data=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InViv
 spikeFolder='C:\Users\Butt Lab\Documents\SpikeSorting';
 load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\A1x32_Map.mat');
 
-data=data(data.Use~=0,:);
+data=data(data.Sorting~=0,:);
 data=loadSampleDuration(data,spikeFolder);
+data=data(data.Use~=0,:);
 
 recToAnalyse=unique(data.MouseID);
 su.PSTH=[];
