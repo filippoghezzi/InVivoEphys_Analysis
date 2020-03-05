@@ -14,6 +14,7 @@ function [PSTH,PSTHbins,raster]=makePSTHandRaster(spikes,suid,stimulus,sr,window
         PSTHbins=-window(1)*1000:binSize*1000:window(2)*1000;
         PSTH(suIdx,:)=histcounts(allTrialRaster,PSTHbins);        
         PSTH(suIdx,:)=PSTH(suIdx,:)./binSize./size(stimulus,1);
+        PSTH(suIdx,:)=smooth(PSTH(suIdx,:),5);
     end
     PSTHbins=PSTHbins(1:end-1);
 end

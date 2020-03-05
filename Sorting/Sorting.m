@@ -5,7 +5,7 @@ clc
 mainSortingDir='C:\Users\Butt Lab\Documents\SpikeSorting';
 
 data=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo_SST;Ai32.csv'); 
-data=data(data.Use~=0,:);
+data=data(data.Sorting~=0,:);
 data.Experiment=fullfile(data.Folder,data.Experiment);
 
 recToAnalyse=unique(data.MouseID);
