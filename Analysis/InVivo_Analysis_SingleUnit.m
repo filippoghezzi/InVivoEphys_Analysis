@@ -3,8 +3,16 @@ clear
 clc
 
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis')) 
-load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData.mat')
-folderFigures='C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SummaryFigures_LabMeeting';
+load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData_ALL.mat')
+data.PSTHvisualOpto=[];
+data.PSTHlaser=[];
+data.responseVisualOpto=[];
+data.responseLaser=[];
+% data1=data;
+% load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData_Part2.mat')
+% data=[data1;data];
+folderFigures='C:\Users\Butt Lab\OneDrive - OnTheHub - The University of Oxford\University of Oxford\Conferences\11th Annual Oxford Neuroscience Symposium\MyInVivo';
+
 %% Set group logic arrays
 data=data(~isnan(data.endSlope),:);
 
@@ -19,7 +27,9 @@ P9P13=data.Age>=9 & data.Age<14;
 P14P18=data.Age>=14;
 
 %Visual response
+% responsive=any(data.responseVisual(:,1:2)==1,2);
 responsive=any(data.responseVisual==1,2);
+
 
 SST=(data.Tagging=='SST' & data.responseTag==1);
 Nkx=(data.Tagging=='Nkx2-1' & data.responseTag==1);
@@ -31,8 +41,8 @@ Untagged=(~SST & ~Nkx);
 
 %% Z-scoring SU
 [Z_PSTHvisual, responsiveVisual]=zscoreBaseline(data.PSTHvisual);
-Z_PSTHvisualOpto=zscoreBaseline(data.PSTHvisualOpto);
-Z_PSTHlaser=zscoreBaseline(data.PSTHlaser);
+% Z_PSTHvisualOpto=zscoreBaseline(data.PSTHvisualOpto);
+% Z_PSTHlaser=zscoreBaseline(data.PSTHlaser);
 Z_PSTHoptotagging=zscoreBaseline(data.PSTHoptotagging);
 
 %% Single Units identity
@@ -521,7 +531,7 @@ ax.YLim=[0,109];
 text(0.65,R3_RS+4,strcat(int2str(nnz(resp&P14P18&RS)),'/',int2str(nnz(P14P18&RS))),'FontSize',20)
 text(1.85,R3_SST+4,strcat(int2str(nnz(resp&P14P18&SST)),'/',int2str(nnz(P14P18&SST))),'FontSize',20)
 text(2.78,R3_FS+4,strcat(int2str(nnz(resp&P14P18&FS)),'/',int2str(nnz(P14P18&FS))),'FontSize',20)
-text(3.83,R3_Nkx_RS+4,strcat(int2str(nnz(resp&P14P18&Nkx_RS)),'/',int2str(nnz(P14P18&SST))),'FontSize',20)
+text(3.83,R3_Nkx_RS+4,strcat(int2str(nnz(resp&P14P18&Nkx_RS)),'/',int2str(nnz(P14P18&Nkx_RS))),'FontSize',20)
 text(4.83,R3_Nkx_FS+4,strcat(int2str(nnz(resp&P14P18&Nkx_FS)),'/',int2str(nnz(P14P18&Nkx_FS))),'FontSize',20)
 
 export_fig(fullfile(folderFigures,'PercentageResponsiveCells'),'-tiff','-transparent','-nocrop')
@@ -530,6 +540,7 @@ close
 %% Visual response stats
 [MaxPSTH_Val,MaxPSTH_Idx]=max(data.PSTHvisual(:,PSTHbins>0&PSTHbins<3000),[],2);
 MaxPSTH_Lat=PSTHbins(MaxPSTH_Idx+find(PSTHbins>0,1)-1);
+[data.MaxPSTH_Val,data.MaxPSTH_Idx]=max(data.PSTHvisual(:,PSTHbins>0&PSTHbins<3000),[],2);
 
 cats_Y=categories(data.cellIdentity(resp&P9P13));
 
@@ -1018,6 +1029,242 @@ if c~=0
     export_fig(fullfile(folderFigures,strcat('PSTH-RS-P14P18-NonResponsive-',int2str(f+1))),'-tiff','-transparent','-nocrop')
     close
 end
+
+%% Imagesc plots - responsive only
+
+%SST
+figure('units','normalized','outerposition',[0 0 1 0.5]);
+ax=subplot(1,2,1);
+imagesc(PSTHbins,1:height(data(resp&SST&P9P13,:)),sortrows(data(resp&SST&P9P13,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(resp&SST&P9P13,:).Layer=='L2/3'),nnz(data(resp&SST&P9P13,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(resp&SST&P9P13,:).Layer=='L5/6')),nnz(not(data(resp&SST&P9P13,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,400];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P9-P13';
+ax.CLim=[0,20];
+
+ax=subplot(1,2,2);
+imagesc(PSTHbins,1:height(data(resp&SST&P14P18,:)),sortrows(data(resp&SST&P14P18,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(resp&SST&P14P18,:).Layer=='L2/3'),nnz(data(resp&SST&P14P18,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(resp&SST&P14P18,:).Layer=='L5/6')),nnz(not(data(resp&SST&P14P18,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,400];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P14-P18';
+
+sgtitle('SST','FontSize',25)
+export_fig(fullfile(folderFigures,'PSTH_img_SST'),'-tiff','-pdf','-transparent','-nocrop')
+close
+    
+%Nkx
+figure('units','normalized','outerposition',[0 0 1 0.5]);
+ax=subplot(1,2,1);
+imagesc(PSTHbins,1:height(data(resp&Nkx&P9P13,:)),sortrows(data(resp&Nkx&P9P13,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(resp&Nkx&P9P13,:).Layer=='L2/3'),nnz(data(resp&Nkx&P9P13,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(resp&Nkx&P9P13,:).Layer=='L5/6')),nnz(not(data(resp&Nkx&P9P13,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,400];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P9-P13';
+ax.CLim=[0,20];
+
+ax=subplot(1,2,2);
+imagesc(PSTHbins,1:height(data(resp&Nkx&P14P18,:)),sortrows(data(resp&Nkx&P14P18,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(resp&Nkx&P14P18,:).Layer=='L2/3'),nnz(data(resp&Nkx&P14P18,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(resp&Nkx&P14P18,:).Layer=='L5/6')),nnz(not(data(resp&Nkx&P14P18,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,400];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P14-P18';
+
+sgtitle('Nkx2-1','FontSize',25)
+export_fig(fullfile(folderFigures,'PSTH_img_Nkx2-1'),'-tiff','-pdf','-transparent','-nocrop')
+close
+
+%RS
+figure('units','normalized','outerposition',[0 0 1 1]);
+ax=subplot(1,2,1);
+imagesc(PSTHbins,1:height(data(resp&RS&P9P13,:)),sortrows(data(resp&RS&P9P13,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(resp&RS&P9P13,:).Layer=='L2/3'),nnz(data(resp&RS&P9P13,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(resp&RS&P9P13,:).Layer=='L5/6')),nnz(not(data(resp&RS&P9P13,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,400];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P9-P13';
+
+ax=subplot(1,2,2);
+imagesc(PSTHbins,1:height(data(resp&RS&P14P18,:)),sortrows(data(resp&RS&P14P18,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(resp&RS&P14P18,:).Layer=='L2/3'),nnz(data(resp&RS&P14P18,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(resp&RS&P14P18,:).Layer=='L5/6')),nnz(not(data(resp&RS&P14P18,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,400];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P14-P18';
+
+sgtitle('RS','FontSize',25)
+export_fig(fullfile(folderFigures,'PSTH_img_RS'),'-tiff','-pdf','-transparent','-nocrop')
+close
+
+%FS
+figure('units','normalized','outerposition',[0 0 1 1]);
+ax=subplot(1,2,2);
+imagesc(PSTHbins,1:height(data(resp&FS&P14P18,:)),sortrows(data(resp&FS&P14P18,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(resp&FS&P14P18,:).Layer=='L2/3'),nnz(data(resp&FS&P14P18,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(resp&FS&P14P18,:).Layer=='L5/6')),nnz(not(data(resp&FS&P14P18,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,400];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P14-P18';
+
+sgtitle('FS','FontSize',25)
+export_fig(fullfile(folderFigures,'PSTH_img_FS'),'-tiff','-pdf','-transparent','-nocrop')
+close
+
+%% Imagesc plots - All
+
+%SST
+figure('units','normalized','outerposition',[0 0 1 0.5]);
+ax=subplot(1,2,1);
+imagesc(PSTHbins,1:height(data(SST&P9P13,:)),sortrows(data(SST&P9P13,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(SST&P9P13,:).Layer=='L2/3'),nnz(data(SST&P9P13,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(SST&P9P13,:).Layer=='L5/6')),nnz(not(data(SST&P9P13,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,1100];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P9-P13';
+
+ax=subplot(1,2,2);
+imagesc(PSTHbins,1:height(data(SST&P14P18,:)),sortrows(data(SST&P14P18,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(SST&P14P18,:).Layer=='L2/3'),nnz(data(SST&P14P18,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(SST&P14P18,:).Layer=='L5/6')),nnz(not(data(SST&P14P18,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,1100];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P14-P18';
+
+sgtitle('SST','FontSize',25)
+export_fig(fullfile(folderFigures,'PSTH_img_SST_all'),'-pdf','-tiff','-transparent','-nocrop')
+close
+    
+%Nkx
+figure('units','normalized','outerposition',[0 0 1 0.5]);
+ax=subplot(1,2,1);
+imagesc(PSTHbins,1:height(data(Nkx&P9P13,:)),sortrows(data(Nkx&P9P13,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(Nkx&P9P13,:).Layer=='L2/3'),nnz(data(Nkx&P9P13,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(Nkx&P9P13,:).Layer=='L5/6')),nnz(not(data(Nkx&P9P13,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,1100];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P9-P13';
+
+ax=subplot(1,2,2);
+imagesc(PSTHbins,1:height(data(Nkx&P14P18,:)),sortrows(data(Nkx&P14P18,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(Nkx&P14P18,:).Layer=='L2/3'),nnz(data(Nkx&P14P18,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(Nkx&P14P18,:).Layer=='L5/6')),nnz(not(data(Nkx&P14P18,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,1100];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P14-P18';
+
+sgtitle('Nkx2-1','FontSize',25)
+export_fig(fullfile(folderFigures,'PSTH_img_Nkx2-1_all'),'-pdf','-tiff','-transparent','-nocrop')
+close
+
+%RS
+figure('units','normalized','outerposition',[0 0 1 1]);
+ax=subplot(1,2,1);
+imagesc(PSTHbins,1:height(data(RS&P9P13,:)),sortrows(data(RS&P9P13,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(RS&P9P13,:).Layer=='L2/3'),nnz(data(RS&P9P13,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(RS&P9P13,:).Layer=='L5/6')),nnz(not(data(RS&P9P13,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,1100];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P9-P13';
+
+ax=subplot(1,2,2);
+imagesc(PSTHbins,1:height(data(RS&P14P18,:)),sortrows(data(RS&P14P18,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(RS&P14P18,:).Layer=='L2/3'),nnz(data(RS&P14P18,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(RS&P14P18,:).Layer=='L5/6')),nnz(not(data(RS&P14P18,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,1100];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P14-P18';
+
+sgtitle('RS','FontSize',25)
+export_fig(fullfile(folderFigures,'PSTH_img_RS_all'),'-pdf','-tiff','-transparent','-nocrop')
+close
+
+%FS
+figure('units','normalized','outerposition',[0 0 1 1]);
+ax=subplot(1,2,2);
+imagesc(PSTHbins,1:height(data(FS&P14P18,:)),sortrows(data(FS&P14P18,:),{'Layer','MaxPSTH_Idx'}).PSTHvisual)
+colormap('hot')
+colorbar
+hold on
+plot([-1000,5000],[nnz(data(FS&P14P18,:).Layer=='L2/3'),nnz(data(FS&P14P18,:).Layer=='L2/3')]+0.5,'w--','LineWidth',2)
+plot([-1000,5000],[nnz(not(data(FS&P14P18,:).Layer=='L5/6')),nnz(not(data(FS&P14P18,:).Layer=='L5/6'))]+0.5,'w--','LineWidth',2)
+ax.XLim=[-100,1100];
+ax.YAxis.Visible='off';
+ax.XLabel.String='Time (ms)';
+ax.FontSize=18;
+ax.Title.String='P14-P18';
+
+sgtitle('FS','FontSize',25)
+export_fig(fullfile(folderFigures,'PSTH_img_FS_all'),'-pdf','-tiff','-transparent','-nocrop')
+close
 
 %% PSTH clustering
 % Set logical groups for responsive cells

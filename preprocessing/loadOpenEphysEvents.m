@@ -11,8 +11,8 @@ function [laser,ledR,laserAndLedR,ledL]=loadOpenEphysEvents(foldername,start)
     elseif exist(fullfile(foldername,'100_CH17.continuous'),'file')  %%%% This condition account for problem in pausing then restarting the recording. 
         [~,dataTime,~]=load_open_ephys_data_faster(strcat(foldername,'\100_CH17','.continuous'));
         [events,eventTime,~]=load_open_ephys_data_faster(strcat(foldername,'\all_channels.events'));
-    elseif exist(fullfile(foldername,'103_CH17.continuous'),'file')
-        [~,dataTime,~]=load_open_ephys_data_faster(strcat(foldername,'\103_CH17','.continuous'));
+    elseif exist(fullfile(foldername,'107_CH17.continuous'),'file')
+        [~,dataTime,~]=load_open_ephys_data_faster(strcat(foldername,'\107_CH17','.continuous'));
         [events,eventTime,~]=load_open_ephys_data_faster(strcat(foldername,'\all_channels.events'));
     end
     laser=[];

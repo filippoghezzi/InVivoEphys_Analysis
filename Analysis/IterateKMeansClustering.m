@@ -29,6 +29,8 @@ function Klabel = IterateKMeansClustering(data, Kvalues, varargin)
     
     [~,K_optimal]=max(median(silVals));
     fprintf('Found optimal K value = %d', K_optimal)
+    median(silVals)
+    std(silVals)
     
     if verbose
         ax=subplot(1,2,1);

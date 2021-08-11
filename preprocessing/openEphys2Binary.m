@@ -1,5 +1,5 @@
 function ops = openEphys2Binary(ops)
-% function ops = convertOpenEphysToRawBInary_MergeRecs(ops)
+% function ops = openEphys2Binary(ops)
 %
 % Modified from KS2 convertOpenEphysToRawBInary to merge different
 % recordings belonging to the same experiment and reorder according to
@@ -22,8 +22,8 @@ for folder=1:size(ops.dataRoot,1)
         elseif exist(fullfile(ops.dataRoot{folder},'100_CH17.continuous'),'file') 
            fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('100_CH%d.continuous', j+16) )); % Added +16 because using ch 17-48  
         %%%% This condition account for recordings done on Liad's rig.%%%%
-        elseif exist(fullfile(ops.dataRoot{folder},'103_CH17.continuous'),'file') 
-            fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('103_CH%d.continuous', j+16) )); % Added +16 because using ch 17-48  
+        elseif exist(fullfile(ops.dataRoot{folder},'107_CH17.continuous'),'file') 
+            fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('107_CH%d.continuous', j+16) )); % Added +16 because using ch 17-48  
         end
     end
     nblocks = cellfun(@(x) numel(x), fs);
@@ -54,6 +54,9 @@ for folder=1:size(ops.dataRoot,1)
 
                 nbatches        = ceil(numel(rawData)/(nSamples+6));
                 for s = 1:nbatches
+                    if s==nbatches
+                        continue
+                    end
                     rawSamps = rawData((s-1) * (nSamples + 6) +6+ [1:nSamples]);
                     collectSamps((s-1)*nSamples + [1:nSamples]) = rawSamps;
                 end

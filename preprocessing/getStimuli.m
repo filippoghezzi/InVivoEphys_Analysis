@@ -9,6 +9,7 @@ function stim=getStimuli(ops,data)
     stim.laserAndLedR=[];
     stim.optotagging=[];
     stim.ledL=[];
+    stim.ledR_SalB=[];
     
     for file=1:height(data)
         if file==1
@@ -38,7 +39,10 @@ function stim=getStimuli(ops,data)
             stim.laserAndLedR=[stim.laserAndLedR;laserAndLedR];   
         
         elseif strcmp(data.Protocol{file},'VisualFlash')
-            stim.ledL=[stim.ledL;ledL];
+            stim.ledR=[stim.ledR;ledR];
+            
+        elseif strcmp(data.Protocol{file},'VisualFlash_K')
+            stim.ledR_SalB=[stim.ledR_SalB;ledR];
             
         end
         
