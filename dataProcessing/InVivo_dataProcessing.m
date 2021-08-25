@@ -5,21 +5,23 @@ close all
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis')) 
 addpath('C:\Users\Butt Lab\Documents\MATLAB\Add-Ons\CircStat2012a')
 
-recordings=readtable('V1_InVivo_SST;Ai32.csv');
+recordings=readtable('V1_InVivo.csv');
 recordings=recordings(~isnan(recordings.Sorting),:);
 recID=unique(recordings.MouseID);
-recFolder='Q:\';
-% recID={'NK58','NSC1','NSC2','NSC4','NSC5','SC55','SC56','SC91','SC92b','SC93b','SC107l','SC107u'};
+% recFolder='Q:\';
+% recID={'NK32'};
 % recFolder='C:\Users\Butt Lab\Documents\SpikeSorting';
 
 for i=1:numel(recID)
     fprintf(strcat('Looking into ...',recID{i},'\n'))
+    mouseData=recordings(strcmp(recordings.MouseID,recID{i}),:);
+    recFolder=mouseData.Folder{1};
     dir=fullfile(recFolder,recID{i});
     results=struct;
 
     %% Load data
     [ops,s,stim] = InVivo_dataProcessing_loadData(dir);
-    
+
     %% Analyse Stimulus Evoked Field Potential
     [results.evokedLFP, ops]=InVivo_dataProcessing_evokedLFP(ops,s,stim.ledR,'Control');
     rez.ops=ops;

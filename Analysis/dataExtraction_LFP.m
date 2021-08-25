@@ -4,14 +4,17 @@ clc
 
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis')) 
 
-recordings=readtable('V1_InVivo_SST;KORD.csv');
+recordings=readtable('V1_InVivo.csv');
 recordings=recordings(~isnan(recordings.Sorting),:);
 recID=unique(recordings.MouseID);
 % recID={'K6','K24','K35','K36','K38','K39'};
-recFolder='D:\InVivo_V1';
+% recFolder='D:\InVivo_V1';
 
 mouseID=[];
 optotagging=[];
+mouseAge=[];
+brainArea=[];
+
 MUA_L4=[];
 MUA_L4_peakFast=[];
 MUA_L4_peakSlow=[];
@@ -41,14 +44,22 @@ for i=1:numel(recID)
 
     thisTagging=recordings.Tagging(strcmp(recordings.MouseID,recID{i}),:);
     thisTagging=thisTagging(1);
+    recFolder=recordings.Folder(strcmp(recordings.MouseID,recID{i}),:);
+    recFolder=recFolder{1};
+    Age=recordings.Age(strcmp(recordings.MouseID,recID{i}),:);
+    Age=Age(1);
+    Area=recordings.BrainArea(strcmp(recordings.MouseID,recID{i}),:);
+    Area=Area{1};
+    
     dir=fullfile(recFolder,recID{i});
     load(fullfile(dir,'processData.mat'),'results')
     load(fullfile(dir,'rez.mat'),'rez')
     
     mouseID=[mouseID;{recID{i}}];
     optotagging=[optotagging;thisTagging];
-        
-        
+    mouseAge=[mouseAge;Age];
+    brainArea=[brainArea;Area];
+    
     selectedMUA=results.evokedLFP.MUA.raw(rez.ops.L4best,:);
     MUA_L4=[MUA_L4;selectedMUA];
     MUA_L4_peakFast=[MUA_L4_peakFast;max(selectedMUA(results.evokedLFP.MUA.bins>0 & results.evokedLFP.MUA.bins<200))]; 
@@ -104,6 +115,8 @@ end
 data=table;
 data.MouseID=categorical(cellstr(mouseID));
 data.Tagging=categorical(cellstr(optotagging));
+data.brainArea=categorical(cellstr(brainArea));
+data.mouseAge=mouseAge;
 
 data.MUA_L4_peakFast=MUA_L4_peakFast;
 data.MUA_L4_peakSlow=MUA_L4_peakSlow;
@@ -130,5 +143,6 @@ data.SB_L4_frequency_K=SB_L4_frequency_K;
 data.MUA_L4=MUA_L4;
 data.MUA_L4_K=MUA_L4_K;
 
+PSTHbins=results.evokedLFP.MUA.bins;
 %% Save
-% save('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData_KORD.mat', 'data', 'PSTHbins')
+save('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\LFPData.mat', 'data', 'PSTHbins')

@@ -7,7 +7,7 @@ function [ops,s,stim]=InVivo_dataProcessing_loadData(folder)
     %% Ops
     load(fullfile(folder,'rez.mat'),'rez') 
     ops=rez.ops;
-    ops.Protocol={'Control'};%%%%%%%%%%%%%%%%%%%
+%     ops.Protocol={'Control'};%%%%%%%%%%%%%%%%%%%
     ops.verbose=1;  
     ops.chanMap=(1:ops.NchanTOT)';
     ops.recID=split(folder,'\');

@@ -12,6 +12,8 @@ recID=unique(recordings.MouseID);
  
 mouseID=[];
 optotagging=[];
+brainArea=[];
+
 suid=[];
 suage=[];
 sulayer=[];
@@ -67,6 +69,8 @@ for i=1:numel(recID)
         thisTagging=thisTagging{1};
         recFolder=recordings.Folder(strcmp(recordings.MouseID,recID{i}),:);
         recFolder=recFolder{1};
+        Area=recordings.BrainArea(strcmp(recordings.MouseID,recID{i}),:);
+        Area=Area{1};
         
         dir=fullfile(recFolder,recID{i});
         load(fullfile(dir,'processData.mat'),'results')
@@ -76,10 +80,14 @@ for i=1:numel(recID)
         thisID(:)={recID{i}};
         tagging=cell(numel(results.s.suid),1);
         tagging(:)={thisTagging};
+        thisBrainArea=cell(numel(results.s.suid),1);
+        thisBrainArea(:)={Area};
         
         %% Spike features
         mouseID=[mouseID;thisID];
         optotagging=[optotagging;tagging];
+        brainArea=[brainArea;thisBrainArea];
+        
         suid=[suid;results.s.suid];
         suage=[suage;results.s.suage];
         sulayer=[sulayer;results.s.sulayer];
@@ -217,6 +225,7 @@ rwFreq=results.evokedLFP.rw.freq;
 data=table;
 data.MouseID=categorical(mouseID);
 data.Tagging=categorical(optotagging);
+data.brainArea=categorical(cellstr(brainArea));
 data.suid=suid;
 data.Age=suage;
 data.Layer=sulayer;

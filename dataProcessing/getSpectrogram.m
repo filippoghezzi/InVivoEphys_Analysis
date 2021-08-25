@@ -10,9 +10,11 @@ function [CFS,f]=getSpectrogram(LFP,fs)
 % Output:
 %       CSF -> time-frequency matrix [frequency timestamps];
 %       f -> frequency vector generated from cwt.
-        
-    LFP=LFP';
-
+    
+    if size(LFP,2)>1    
+        LFP=LFP';
+    end
+    
     for trial=1:size(LFP,1)
         [tmp_cfs,f] = cwt(LFP(trial,:),fs);
         tmp_cfs=abs(tmp_cfs);

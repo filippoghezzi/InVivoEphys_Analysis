@@ -15,15 +15,16 @@ function spectral=InVivo_dataProcessing_baseline_powerSpectrum(ops,s,varargin)
     addRequired(p,'s', @(x) isstruct(x));
 
     addOptional(p,'LFP', [], @(x) isnumeric(x));
-    addOptional(p,'endBaseline', [], @(x) isnumeric(x));
+    addOptional(p,'BaselineWindow', [], @(x) isnumeric(x));
     addOptional(p,'Plotting', 0, @(x) isnumeric(x));
 
     parse(p,ops,s,varargin{:});
     
     ops=p.Results.ops;
     plotFlag=p.Results.Plotting;
-    if ~isempty(p.Results.endBaseline)
-        endBaseline=p.Results.endBaseline; 
+    if ~isempty(p.Results.BaselineWindow)
+        startBaseline=p.Results.BaselineWindow(1);
+        endBaseline=p.Results.BaselineWindow(2); 
     else
         endBaseline=ops.nSamplesBlocks(1); %Samples
         if endBaseline > 30*60*ops.fs; endBaseline = 30*60*ops.fs; end %Select only first 30 min of baseline recording if longer
@@ -31,8 +32,6 @@ function spectral=InVivo_dataProcessing_baseline_powerSpectrum(ops,s,varargin)
     
     if ~isempty(p.Results.LFP)
         LFP=p.Results.LFP;
-    else
-        LFP = loadLFP(ops.fbinary,1,ops.fs,ops.NchanTOT,[0 endBaseline/ops.fs]);  
     end
     
     fprintf(strcat('Running spectral analysis...','\n'))
@@ -46,7 +45,7 @@ function spectral=InVivo_dataProcessing_baseline_powerSpectrum(ops,s,varargin)
     LFP_nChannels=size(LFP,1);
     LFP_frequency=1:0.01:49;
     LFP_PSD=zeros(LFP_nChannels,numel(LFP_frequency));
-    MUA = loadLFP(ops.fbinary,1,ops.fs,ops.NchanTOT,[0 60*5],'MUA');
+    MUA = loadLFP_baseline(ops.fbinary,ops.fs,ops.NchanTOT,startBaseline,endBaseline,'MUA');  
     MUA_frequency=400:10:4000;
     MUApower=zeros(ops.NchanTOT,numel(MUA_frequency));
     SU_spikeRate=zeros(numel(s.suid),1);

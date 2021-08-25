@@ -3,7 +3,7 @@ close all
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\spikes'))
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\npy-matlab'))
 mainSortingDir='C:\Users\Butt Lab\Documents\SpikeSorting';
-data=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo_SST;KORD.csv');
+data=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo.csv');
 data=data((data.Sorting~=0) & (~isnan(data.Sorting)),:);
 ID=unique(data.MouseID);
 

@@ -3,8 +3,8 @@ close all
 clc
 
 mainSortingDir='C:\Users\Butt Lab\Documents\SpikeSorting';
-data=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo_SST;KORD.csv');
-data=data((data.Sorting~=0) & (~isnan(data.Sorting)),:);
+data=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo.csv');
+data=data(data.Preprocessing==1,:);
 data.Experiment=fullfile(data.Folder,data.MouseID,data.Experiment);
 IDs=unique(data.MouseID);
 

@@ -6,7 +6,7 @@ function [results,ops]=InVivo_dataProcessing_evokedLFP(ops,s,stim,condition)
     results=struct;
     ops.condition=condition;
 
-    eLFP = loadLFP(ops.fbinary,stim,ops.fs,ops.NchanTOT,ops.LFPwindow,'LFP');
+    eLFP = loadLFP_stimuli(ops.fbinary,stim,ops.fs,ops.NchanTOT,ops.LFPwindow,'LFP');
     
     CSD = getCSD(eLFP(ops.electrodeChannelsForCSD,:,:),ops.fs,ops.electrodeSpacing,ops.electrodeLength,ops.electrodeType);
     

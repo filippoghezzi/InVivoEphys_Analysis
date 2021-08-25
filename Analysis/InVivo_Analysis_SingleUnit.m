@@ -3,7 +3,7 @@ clear
 clc
 
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis')) 
-load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData_ALL.mat')
+load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData.mat')
 data.PSTHvisualOpto=[];
 data.PSTHlaser=[];
 data.responseVisualOpto=[];
@@ -15,7 +15,7 @@ folderFigures='C:\Users\Butt Lab\OneDrive - OnTheHub - The University of Oxford\
 
 %% Set group logic arrays
 data=data(~isnan(data.endSlope),:);
-
+data=data(data.Tagging~='SST;NrgKO',:);
 %Layer
 tmpLayers(data.Layer==1,1)=categorical(cellstr('L2/3'));
 tmpLayers(data.Layer==2,1)=categorical(cellstr('L4'));
@@ -44,6 +44,17 @@ Untagged=(~SST & ~Nkx);
 % Z_PSTHvisualOpto=zscoreBaseline(data.PSTHvisualOpto);
 % Z_PSTHlaser=zscoreBaseline(data.PSTHlaser);
 Z_PSTHoptotagging=zscoreBaseline(data.PSTHoptotagging);
+
+
+%%
+Z=zscore(data.PSTHvisual,[],'all');
+responsive=any(Z(:,PSTHbins>0 & PSTHbins<200)>=3,2);
+
+for i=6:18
+    fastPerc(i)=nnz(responsive(data.Age==i,:))/numel(responsive(data.Age==i,:));
+    slowPerc(i)=nnz(data.rw_responsive(data.Age==i,:))/numel(data.rw_responsive(data.Age==i,:));
+    bothPerc(i)=nnz(responsive(data.Age==i,:) & data.rw_responsive(data.Age==i,:))/numel(data.rw_responsive(data.Age==i,:));
+end
 
 %% Single Units identity
 %P14-P18
@@ -455,6 +466,7 @@ ax.FontSize=20;
 % export_fig(fullfile('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SummaryFigures',figname),'-tiff','-transparent')
 
 %% Responsive units stats
+% resp=data.rw_responsive;
 resp=responsive;
 colours={[255,227,145]/255,[0,0,179]/255,[203,24,29]/255,[107,174,214]/255,[253,141,60]/255};
 
@@ -534,8 +546,8 @@ text(2.78,R3_FS+4,strcat(int2str(nnz(resp&P14P18&FS)),'/',int2str(nnz(P14P18&FS)
 text(3.83,R3_Nkx_RS+4,strcat(int2str(nnz(resp&P14P18&Nkx_RS)),'/',int2str(nnz(P14P18&Nkx_RS))),'FontSize',20)
 text(4.83,R3_Nkx_FS+4,strcat(int2str(nnz(resp&P14P18&Nkx_FS)),'/',int2str(nnz(P14P18&Nkx_FS))),'FontSize',20)
 
-export_fig(fullfile(folderFigures,'PercentageResponsiveCells'),'-tiff','-transparent','-nocrop')
-close
+% export_fig(fullfile(folderFigures,'PercentageResponsiveCells'),'-tiff','-transparent','-nocrop')
+% close
 
 %% Visual response stats
 [MaxPSTH_Val,MaxPSTH_Idx]=max(data.PSTHvisual(:,PSTHbins>0&PSTHbins<3000),[],2);
@@ -660,7 +672,7 @@ for i=1:height(subset)
 	ax=applyFont(ax,0);
     ax.XLabel.String=[];
     ax.YLabel.String=[];
-    ax.YLim=[-3,25];
+    ax.YLim=[-3,35];
     ax.Title.String=strcat(char(subset.MouseID(i)),' - U',int2str(subset.suid(i)),' - P',int2str(subset.Age(i)),' -',char(subset.Layer(i)));
     ax.Title.FontSize=16;
     ax.Color=[247,247,247]/255;
@@ -699,7 +711,7 @@ for i=1:height(subset)
 	ax=applyFont(ax,0);
     ax.XLabel.String=[];
     ax.YLabel.String=[];
-    ax.YLim=[-3,30];
+    ax.YLim=[-3,35];
     ax.Title.String=strcat(char(subset.MouseID(i)),' - U',int2str(subset.suid(i)),' - P',int2str(subset.Age(i)),' -',char(subset.Layer(i)));
     ax.Title.FontSize=16;
     ax.Color=[247,247,247]/255;

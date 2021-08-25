@@ -25,7 +25,11 @@ function CSD = getCSD(data,fs,electrodeSpacing,electrodeLength,electrodeType)
     data=[data(1,:,:);data;data(end,:,:)];
     
     % Average across trials
-    meanERP=mean(data,3);
+    if size(data,3)>1
+        meanERP=mean(data,3);
+    else
+        meanERP=data;
+    end
     
     % Detrend: optimise CSD if adjacent channels have different voltage offset baseline
     meanERP=meanERP';
