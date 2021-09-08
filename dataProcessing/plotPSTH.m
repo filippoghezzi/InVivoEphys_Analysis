@@ -10,6 +10,10 @@ function plotPSTH(s,condition,varargin)
         PSTH = s.PSTHlaser;
     elseif strcmp(condition,'Visual_K')
         PSTH = s.PSTHvisual_K;
+    elseif strcmp(condition,'WhiskerStim')
+        PSTH = s.PSTHwhisker;
+    elseif strcmp(condition,'WhiskerStim_K')
+        PSTH = s.PSTHwhisker_K;
     end
     
     PSTHbins = s.PSTHbins;

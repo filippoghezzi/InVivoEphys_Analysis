@@ -191,7 +191,7 @@ function ops = selectL4channels(ops)
             L4channels=[L4channels.*2-1,L4channels.*2];
             L4channels=[min(L4channels)-1 L4channels max(L4channels)+1];
             L4channels=sort(L4channels,'ascend');
-        elseif size(L4channels,2)==2 || size(L4channels,2)==3 
+        elseif size(L4channels,2)==2 || size(L4channels,2)==3 || size(L4channels,2)==4
             L4channels=[L4channels.*2-1,L4channels.*2];
             L4channels=sort(L4channels,'ascend');
         else

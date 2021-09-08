@@ -16,6 +16,11 @@ folderFigures='C:\Users\Butt Lab\OneDrive - OnTheHub - The University of Oxford\
 %% Set group logic arrays
 data=data(~isnan(data.endSlope),:);
 data=data(data.Tagging~='SST;NrgKO',:);
+data=data(data.brainArea=='V1',:);
+data=data(data.Tagging~='SST;NrgKO',:);
+
+
+
 %Layer
 tmpLayers(data.Layer==1,1)=categorical(cellstr('L2/3'));
 tmpLayers(data.Layer==2,1)=categorical(cellstr('L4'));
@@ -87,8 +92,8 @@ ax.LineWidth = 1.5;
 ax.YAxis.Visible='off';
 grid
 legend('Nkx2-1','SST')
-export_fig(fullfile(folderFigures,'WF_scatter_P14P18'),'-tiff','-transparent','-nocrop')
-close
+% export_fig(fullfile(folderFigures,'WF_scatter_P14P18'),'-tiff','-transparent','-nocrop')
+% close
 
 % <P14
 figure('units','normalized','outerposition',[0 0 1 1]);
@@ -120,8 +125,8 @@ ax.LineWidth = 1.5;
 ax.YAxis.Visible='off';
 legend('Nkx2-1','SST')
 grid
-export_fig(fullfile(folderFigures,'WF_scatter_P8P13'),'-tiff','-transparent','-nocrop')
-close
+% export_fig(fullfile(folderFigures,'WF_scatter_P8P13'),'-tiff','-transparent','-nocrop')
+% close
 
 
 %% Extract waveforms

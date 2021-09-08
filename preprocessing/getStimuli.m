@@ -20,7 +20,7 @@ function stim=getStimuli(ops,data)
             endSamples=startSamples+ops.nSamplesBlocks(file);
         end 
         
-        [laser,ledR,laserAndLedR,ledL]=loadOpenEphysEvents(data.Experiment{file},startSamples);
+        [laser,ledR,laserAndLedR,ledL,whiskerStim]=loadOpenEphysEvents(data.Experiment{file},startSamples);
        
         if strcmp(data.Protocol{file},'VisualFlash_Opto')
             stim.ledR=[stim.ledR;ledR];
@@ -43,7 +43,15 @@ function stim=getStimuli(ops,data)
             
         elseif strcmp(data.Protocol{file},'VisualFlash_K')
             stim.ledR_SalB=[stim.ledR_SalB;ledR];
+        
+        elseif strcmp(data.Protocol{file},'WhiskerPairedPulse')
+            stim.whiskerStim=whiskerStim;
+            fprintf('Found %3.0f whisker stimuli... \n', size(whiskerStim,1));
             
+        elseif strcmp(data.Protocol{file},'WhiskerPairedPulse_K')
+            stim.whiskerStim_SalB=whiskerStim;
+            fprintf('Found %3.0f whisker stimuli after chemogenetic... \n', size(whiskerStim,1));
+
         end
         
     end

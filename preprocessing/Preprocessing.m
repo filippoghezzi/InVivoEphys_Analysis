@@ -12,7 +12,8 @@ for recording=1:length(IDs)
     fprintf('************************************************************************************************************************ \n')
     fprintf(strcat('Looking into ...',IDs{recording},'\n'))
     mouseData=data(strcmp(data.MouseID,IDs{recording}),:);
-    
+    tic; 
+
     clear ops stim
     dirIN=mouseData.Experiment;    
     dirOUT=fullfile(mainSortingDir,IDs{recording});
@@ -32,9 +33,7 @@ for recording=1:length(IDs)
         %% Build binary file
         ops.Protocol=mouseData.Protocol;
         ops.age = mouseData.Age(1);
-        fprintf(strcat('Build binary *.dat file for ...',IDs{recording},'\n'))
-        tic; 
-        
+        fprintf(strcat('Build binary *.dat file for ...',IDs{recording},'\n'))        
         ops = makeBinary(ops,dirIN,dirOUT);
         save(fullfile(dirOUT, 'ops.mat'), 'ops', '-v7.3');
         fprintf('Time %3.0fs. Finished building binary file... \n', toc);
@@ -47,7 +46,5 @@ for recording=1:length(IDs)
         stim = getStimuli(ops,mouseData); 
         save(fullfile(dirOUT, 'stimuli.mat'), 'stim', '-v7.3')
         fprintf('Time %3.0fs. Saved stimuli... \n', toc);
-    end
-
-    
+    end   
 end

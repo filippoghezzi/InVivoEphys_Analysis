@@ -4,7 +4,11 @@ function s = InVivo_dataProcessing_singleUnits_getPSTHbyCondition(s,stim,ops,ver
     binSize=ops.PSTHbinSize; %s
     
     if ops.SalB
-        conditions={'Visual','Visual_K'};
+        if strcmp(ops.brainArea, 'V1')
+            conditions={'Visual','Visual_K'};
+        elseif strcmp(ops.brainArea, 'S1BF')
+            conditions={'WhiskerStim','WhiskerStim_K'};
+        end
     else
         conditions={'Visual','Optotagging','VisualOpto','LaserOnly'};
     end
@@ -23,6 +27,20 @@ function s = InVivo_dataProcessing_singleUnits_getPSTHbyCondition(s,stim,ops,ver
                 artefactRemoval=[];
                 [s.PSTHvisual_K,s.PSTHbins,raster]=getPSTHbyUnit(s,stimulus,ops.fs,rasterWindow,binSize,artefactRemoval);
                 s.response.visual_K=getUnitResponsiveness(raster,conditions{cond});
+                if verbose; plotPSTH(s,conditions{cond},ops.dirOUT); end
+            
+            case 'WhiskerStim'
+                stimulus=stim.whiskerStim(:,1);
+                artefactRemoval=[];
+                [s.PSTHwhisker,s.PSTHbins,raster]=getPSTHbyUnit(s,stimulus,ops.fs,rasterWindow,binSize,artefactRemoval);
+                s.response.whisker=getUnitResponsiveness(raster,conditions{cond});
+                if verbose; plotPSTH(s,conditions{cond},ops.dirOUT); end
+            
+            case 'WhiskerStim_K'
+                stimulus=stim.whiskerStim_SalB(:,1);
+                artefactRemoval=[];
+                [s.PSTHwhisker_K,s.PSTHbins,raster]=getPSTHbyUnit(s,stimulus,ops.fs,rasterWindow,binSize,artefactRemoval);
+                s.response.whisker_K=getUnitResponsiveness(raster,conditions{cond});
                 if verbose; plotPSTH(s,conditions{cond},ops.dirOUT); end
                 
             case 'Optotagging'

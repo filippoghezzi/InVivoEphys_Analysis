@@ -1,4 +1,4 @@
-function [laser,ledR,laserAndLedR,ledL]=loadOpenEphysEvents(foldername,start)
+function [laser,ledR,laserAndLedR,ledL,whiskerStim]=loadOpenEphysEvents(foldername,start)
 % events: 0 -> laser
 %         2 -> contralateral LED
     
@@ -19,8 +19,19 @@ function [laser,ledR,laserAndLedR,ledL]=loadOpenEphysEvents(foldername,start)
     ledR=[];
     laserAndLedR=[];
     ledL=[];
+    whiskerStim=[];
+    whiskerStimFirst=[];
     i=1;
+    
+    if ~isempty(events) && events(i)==7
+        derEventTime=[10;diff(eventTime)];
+        eventTime=eventTime(derEventTime>0.005);
+        events=events(derEventTime>0.005);
+    end
+    
     while i <= size(events,1)
+
+        
         if events(i)==0 && events(i+1)==0 %Case laser only
             [~,onset] = min(abs(dataTime-eventTime(i)));
             [~,offset] = min(abs(dataTime-eventTime(i+1)));
@@ -43,9 +54,15 @@ function [laser,ledR,laserAndLedR,ledL]=loadOpenEphysEvents(foldername,start)
             i=i+4;   %%To fix in case multiple stimuli are presented at the same time.
         
         elseif events(i)==6 && events(i+1)==6 %Case ipsilateral LED only
-            [~,onset] = min(abs(dataTime-eventTime(i+1)));
+            [~,onset] = min(abs(dataTime-eventTime(i)));
             ledL=[ledL;onset+start];
             i=i+2;
+       
+        elseif events(i)==7 && numel(events)==200 % Whisker stim paired pulse
+            [~,onsetFirst] = min(abs(dataTime-eventTime(i)));
+            [~,onsetSecond] = min(abs(dataTime-eventTime(i+2)));
+            whiskerStim=[whiskerStim;[onsetFirst,onsetSecond]+start];
+            i=i+4;
 
         else
             i=i+2;

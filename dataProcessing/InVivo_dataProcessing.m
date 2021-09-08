@@ -9,7 +9,9 @@ recordings=readtable('V1_InVivo.csv');
 recordings=recordings(~isnan(recordings.Sorting),:);
 recID=unique(recordings.MouseID);
 % recFolder='Q:\';
-% recID={'NK32'};
+% recID={'K48'};
+recID={'K48'};
+
 % recFolder='C:\Users\Butt Lab\Documents\SpikeSorting';
 
 for i=1:numel(recID)
@@ -21,9 +23,20 @@ for i=1:numel(recID)
 
     %% Load data
     [ops,s,stim] = InVivo_dataProcessing_loadData(dir);
+    
+    %% Select stimuli
+    if strcmp(mouseData.BrainArea{1},'S1BF')
+        stimControl=stim.whiskerStim;
+        if ops.SalB; stimChemo=stim.whiskerStim_SalB; end
+        ops.brainArea='S1BF';
+    elseif strcmp(mouseData.BrainArea{1},'V1')
+        stimControl=stim.ledR;
+        if ops.SalB; stimChemo=stim.ledR_SalB; end
+        ops.brainArea='V1';
+    end
 
-    %% Analyse Stimulus Evoked Field Potential
-    [results.evokedLFP, ops]=InVivo_dataProcessing_evokedLFP(ops,s,stim.ledR,'Control');
+    %% Analyse Stimulus Evoked Field Potential    
+    [results.evokedLFP, ops]=InVivo_dataProcessing_evokedLFP(ops,s,stimControl,'Control');
     rez.ops=ops;
     save(fullfile(dir,'rez.mat'),'rez')
 
@@ -37,7 +50,7 @@ for i=1:numel(recID)
     if ops.SalB
         fprintf(strcat('Analysing chemogenetic condition...','\n'))
 %         ops=rmfield(ops,'L4');
-        [results.SalB.evokedLFP, ops_SalB]=InVivo_dataProcessing_evokedLFP(ops,s,stim.ledR_SalB,'SalB');
+        [results.SalB.evokedLFP, ops_SalB]=InVivo_dataProcessing_evokedLFP(ops,s,stimChemo,'SalB');
         results.SalB.baseline=InVivo_dataProcessing_baseline(ops_SalB,s,'Condition','SalB');
         results.SalB.ops=ops_SalB;
     end

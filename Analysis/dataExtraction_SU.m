@@ -25,16 +25,19 @@ troughPeakTime=[];
 peakTroughRatio=[];
 endSlope=[];
 PSTHvisual=[];
+PSTHwhisker=[];
 PSTHoptotagging=[];
 PSTHvisualOpto=[];
 PSTHlaser=[];
 responseVisual=[];
+responseWhisker=[];
 responseTag=[];
 responseVisualOpto=[];
 responseLaser=[];
 PSTHvisualK=[];
 responseVisualK=[];
-
+PSTHwhiskerK=[];
+responseWhiskerK=[];
 
 baseline_PPC=[];
 baseline_vectorLength=[];
@@ -99,10 +102,11 @@ for i=1:numel(recID)
         wf=[wf;results.s.suWf];
         filt_wf=[filt_wf;results.s.filt_suWf];
 
-        %% PSTH
-        PSTHvisual=[PSTHvisual;results.s.PSTHvisual];
-        responseVisual=[responseVisual;results.s.response.visual];
-        
+        %% PSTH        
+        tmpPSTHvisual=nan(numel(results.s.suid),2000);
+        tmpresponseVisual=nan(numel(results.s.suid),20);
+        tmpPSTHwhisker=nan(numel(results.s.suid),2000);
+        tmpresponseWhisker=nan(numel(results.s.suid),1);        
         tmpPSTHoptotagging=nan(numel(results.s.suid),2000);
         tmpresponseTag=nan(numel(results.s.suid),1);
         tmpPSTHvisualOpto=nan(numel(results.s.suid),2000);
@@ -111,7 +115,17 @@ for i=1:numel(recID)
         tmpresponseLaser=nan(numel(results.s.suid),2);
         tmpPSTHvisual_K=nan(numel(results.s.suid),2000);
         tmpresponseVisualK=nan(numel(results.s.suid),20);
-           
+        tmpPSTHwhisker_K=nan(numel(results.s.suid),2000);
+        tmpresponseWhisker_K=nan(numel(results.s.suid),1);
+        
+        if isfield(results.s,'PSTHvisual') && ~isempty(results.s.PSTHvisual)
+            tmpPSTHvisual=results.s.PSTHvisual;
+            tmpresponseVisual=results.s.response.visual;
+        end        
+        if isfield(results.s,'PSTHwhisker') && ~isempty(results.s.PSTHwhisker)
+            tmpPSTHwhisker=results.s.PSTHwhisker;
+            tmpresponseWhisker=results.s.response.whisker;
+        end      
         if isfield(results.s,'PSTHoptotagging') && ~isempty(results.s.PSTHoptotagging)
             tmpPSTHoptotagging=results.s.PSTHoptotagging;
             tmpresponseTag=results.s.response.optotagging;
@@ -128,16 +142,25 @@ for i=1:numel(recID)
             tmpPSTHvisual_K=results.s.PSTHvisual_K;
             tmpresponseVisualK=results.s.response.visual_K;
         end
-                
+        if isfield(results.s,'PSTHwhisker_K') && ~isempty(results.s.PSTHwhisker_K)
+            tmpPSTHwhisker_K=results.s.PSTHwhisker_K;
+            tmpresponseWhisker_K=results.s.response.whisker_K;
+        end
+        
+        PSTHvisual=[PSTHvisual;tmpPSTHvisual];
+        responseVisual=[responseVisual;tmpresponseVisual];        
+        PSTHwhisker=[PSTHwhisker;tmpPSTHwhisker];
+        responseWhisker=[responseWhisker;tmpresponseWhisker];        
         PSTHoptotagging=[PSTHoptotagging;tmpPSTHoptotagging];
         responseTag=[responseTag;tmpresponseTag];
-            
         PSTHvisualOpto=[PSTHvisualOpto;tmpPSTHvisualOpto];
         responseVisualOpto=[responseVisualOpto;tmpresponseVisualOpto];
         PSTHlaser=[PSTHlaser;tmpPSTHlaser];
         responseLaser=[responseLaser;tmpresponseLaser];
         PSTHvisualK=[PSTHvisualK;tmpPSTHvisual_K];
         responseVisualK=[responseVisualK;tmpresponseVisualK];
+        PSTHwhiskerK=[PSTHwhiskerK;tmpPSTHwhisker_K];
+        responseWhiskerK=[responseWhiskerK;tmpresponseWhisker_K];  
         
         %% Control    
         % PPC
@@ -154,17 +177,24 @@ for i=1:numel(recID)
 %         coherence=[coherence;lowCoherence,betaCoherence,gammaCoherence];
         
         % RW
-        rw_p=[];
-        for unit=1:numel(results.s.suid)
-            rw_p(unit,1)=signrank(results.evokedLFP.rw.baselineFiringFreq(unit,:)',results.evokedLFP.rw.firingFreq(unit,:));
+        if isfield(results.evokedLFP,'rw')
+            rw_p=[];
+            for unit=1:numel(results.s.suid)
+                rw_p(unit,1)=signrank(results.evokedLFP.rw.baselineFiringFreq(unit,:)',results.evokedLFP.rw.firingFreq(unit,:));
+            end
+            responsive=zeros(numel(results.s.suid),1);
+            responsive(rw_p<=0.05)=1;
+
+            rw_responsive=[rw_responsive;responsive];
+            rw_firing=[rw_firing;mean(results.evokedLFP.rw.firingFreq,2)];
+            rw_baselineFiring=[rw_baselineFiring;mean(results.evokedLFP.rw.baselineFiringFreq,2)];
+            rw_rho=[rw_rho;results.evokedLFP.rw.spikeLFP_rho];
+        else
+            rw_responsive=[rw_responsive;zeros(numel(results.s.suid),1)];
+            rw_firing=[rw_firing;zeros(numel(results.s.suid),1)];
+            rw_baselineFiring=[rw_baselineFiring;zeros(numel(results.s.suid),1)];
+            rw_rho=[rw_rho;zeros(numel(results.s.suid),16)];
         end
-        responsive=zeros(numel(results.s.suid),1);
-        responsive(rw_p<=0.05)=1;
-        
-        rw_responsive=[rw_responsive;responsive];
-        rw_firing=[rw_firing;mean(results.evokedLFP.rw.firingFreq,2)];
-        rw_baselineFiring=[rw_baselineFiring;mean(results.evokedLFP.rw.baselineFiringFreq,2)];
-        rw_rho=[rw_rho;results.evokedLFP.rw.spikeLFP_rho];
         
         baseline_firing=[baseline_firing;results.baseline.singleUnitFiringFrequency];
         
@@ -184,17 +214,24 @@ for i=1:numel(recID)
     %         coherence_K=[coherence_K;lowCoherence_K,betaCoherence_K,gammaCoherence_K];
 
             % RW
-            rw_p_K=[];
-            for unit=1:numel(results.s.suid)
-                rw_p_K(unit,1)=signrank(results.SalB.evokedLFP.rw.baselineFiringFreq(unit,:)',results.SalB.evokedLFP.rw.firingFreq(unit,:));
-            end
-            responsive_K=zeros(numel(results.s.suid),1);
-            responsive_K(rw_p_K<=0.05)=1;
+            if isfield(results.SalB.evokedLFP,'rw')
+                rw_p_K=[];
+                for unit=1:numel(results.s.suid)
+                    rw_p_K(unit,1)=signrank(results.SalB.evokedLFP.rw.baselineFiringFreq(unit,:)',results.SalB.evokedLFP.rw.firingFreq(unit,:));
+                end
+                responsive_K=zeros(numel(results.s.suid),1);
+                responsive_K(rw_p_K<=0.05)=1;
 
-            rw_responsive_K=[rw_responsive_K;responsive_K];
-            rw_firing_K=[rw_firing_K;mean(results.SalB.evokedLFP.rw.firingFreq,2)];
-            rw_baselineFiring_K=[rw_baselineFiring_K;mean(results.SalB.evokedLFP.rw.baselineFiringFreq,2)];
-            rw_rho_K=[rw_rho_K;results.SalB.evokedLFP.rw.spikeLFP_rho];
+                rw_responsive_K=[rw_responsive_K;responsive_K];
+                rw_firing_K=[rw_firing_K;mean(results.SalB.evokedLFP.rw.firingFreq,2)];
+                rw_baselineFiring_K=[rw_baselineFiring_K;mean(results.SalB.evokedLFP.rw.baselineFiringFreq,2)];
+                rw_rho_K=[rw_rho_K;results.SalB.evokedLFP.rw.spikeLFP_rho];
+            else
+                rw_responsive_K=[rw_responsive_K;zeros(numel(results.s.suid),1)];
+                rw_firing_K=[rw_firing_K;zeros(numel(results.s.suid),1)];
+                rw_baselineFiring_K=[rw_baselineFiring_K;zeros(numel(results.s.suid),1)];
+                rw_rho_K=[rw_rho_K;zeros(numel(results.s.suid),16)];
+            end
 
             baseline_firing_K=[baseline_firing_K;results.SalB.baseline.singleUnitFiringFrequency];
     else
@@ -237,10 +274,12 @@ data.troughPeakTime=troughPeakTime;
 data.peakTroughRatio=peakTroughRatio;
 data.endSlope=endSlope;
 data.PSTHvisual=PSTHvisual;
+data.PSTHwhisker=PSTHwhisker;
 data.PSTHoptotagging=PSTHoptotagging;
 data.PSTHvisualOpto=PSTHvisualOpto;
 data.PSTHlaser=PSTHlaser;
 data.responseVisual=responseVisual;
+data.responseWhisker=responseWhisker;
 data.responseTag=responseTag;
 data.responseVisualOpto=responseVisualOpto;
 data.responseLaser=responseLaser;
@@ -257,6 +296,8 @@ data.baseline_firing=baseline_firing;
 
 data.PSTHvisual_K=PSTHvisualK;
 data.responseVisual_K=responseVisualK;
+data.PSTHwhisker_K=PSTHwhiskerK;
+data.responseWhisker_K=responseWhiskerK;
 data.PPC_K=baseline_PPC_K;
 data.vectorLength_K=baseline_vectorLength_K;
 data.vectorAngle_K=baseline_vectorAngle_K;

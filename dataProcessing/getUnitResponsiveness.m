@@ -26,7 +26,16 @@ function response=getUnitResponsiveness(raster,condition)
 %         off=@(x) nnz(x>200&x<300);
 %         late=@(x) nnz(x>800&x<900);
         cutoff=0;
-
+        
+    elseif strcmp(condition,'WhiskerStim') || strcmp(condition,'WhiskerStim_K') 
+        baselineWindow=[-100,-50];
+        targetWindow=[0,50];
+%         baseline=@(x) nnz(x>-100&x<0);
+%         on=@(x) nnz(x>0&x<100);
+%         off=@(x) nnz(x>200&x<300);
+%         late=@(x) nnz(x>800&x<900);
+        cutoff=0;
+        
     elseif strcmp(condition,'Optotagging') 
         baselineWindow=[-50,0];
         targetWindow=[0,50];

@@ -49,7 +49,7 @@ for i=1:numel(recID)
     Age=recordings.Age(strcmp(recordings.MouseID,recID{i}),:);
     Age=Age(1);
     Area=recordings.BrainArea(strcmp(recordings.MouseID,recID{i}),:);
-    Area=Area{1};
+    Area=categorical(cellstr((Area{1})));
     
     dir=fullfile(recFolder,recID{i});
     load(fullfile(dir,'processData.mat'),'results')
@@ -109,7 +109,6 @@ for i=1:numel(recID)
         SB_L4_frequency_K=[SB_L4_frequency_K;nan(1,1)];
     end
 end
-
 
 %% Make table
 data=table;
