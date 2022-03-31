@@ -1,18 +1,18 @@
-function [laser,ledR,laserAndLedR,ledL,whiskerStim]=loadOpenEphysEvents(foldername,start)
+function [laser,ledR,laserAndLedR,ledL,whiskerStim]=loadOpenEphysEvents(foldername,start,electrodeStart)
 % events: 0 -> laser
 %         2 -> contralateral LED
     
     addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\analysis-tools')) % path to kilosort folder
 
     %% Load datatime and events
-    if exist(fullfile(foldername,'100_CH17_2.continuous'),'file')
-        [~,dataTime,~]=load_open_ephys_data_faster(strcat(foldername,'\100_CH17_2','.continuous'));
-        [events,eventTime,~]=load_open_ephys_data_faster(strcat(foldername,'\all_channels_2.events'));
-    elseif exist(fullfile(foldername,'100_CH17.continuous'),'file')  %%%% This condition account for problem in pausing then restarting the recording. 
-        [~,dataTime,~]=load_open_ephys_data_faster(strcat(foldername,'\100_CH17','.continuous'));
+    if exist(fullfile(foldername,sprintf('100_%d.continuous', 1+electrodeStart)),'file')
+        [~,dataTime,~]=load_open_ephys_data_faster(fullfile(foldername,sprintf('100_%d.continuous', 1+electrodeStart)));
         [events,eventTime,~]=load_open_ephys_data_faster(strcat(foldername,'\all_channels.events'));
-    elseif exist(fullfile(foldername,'107_CH17.continuous'),'file')
-        [~,dataTime,~]=load_open_ephys_data_faster(strcat(foldername,'\107_CH17','.continuous'));
+    elseif exist(fullfile(foldername,sprintf('100_CH%d.continuous', 1+electrodeStart)),'file')  %%%% This condition account for problem in pausing then restarting the recording. 
+        [~,dataTime,~]=load_open_ephys_data_faster(fullfile(foldername,sprintf('100_CH%d.continuous', 1+electrodeStart)));
+        [events,eventTime,~]=load_open_ephys_data_faster(strcat(foldername,'\all_channels.events'));
+    elseif exist(fullfile(foldername,sprintf('104_CH%d.continuous', 1+electrodeStart)),'file')
+        [~,dataTime,~]=load_open_ephys_data_faster(fullfile(foldername,sprintf('104_CH%d.continuous', 1+electrodeStart)));
         [events,eventTime,~]=load_open_ephys_data_faster(strcat(foldername,'\all_channels.events'));
     end
     laser=[];

@@ -17,13 +17,13 @@ for folder=1:size(ops.dataRoot,1)
     clear fs
     for j = 1:ops.Nchan
         %%%% This condition account for problem in pausing then restarting the recording.%%%%
-        if exist(fullfile(ops.dataRoot{folder},'100_CH17_2.continuous'),'file')   
-           fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('100_CH%d_2.continuous', j+16) )); 
-        elseif exist(fullfile(ops.dataRoot{folder},'100_CH17.continuous'),'file') 
-           fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('100_CH%d.continuous', j+16) )); % Added +16 because using ch 17-48  
+        if exist(fullfile(ops.dataRoot{folder},sprintf('100_%d.continuous', 1+ops.ElectrodeStart)),'file')   
+           fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('100_%d.continuous', j+ops.ElectrodeStart) )); 
+        elseif exist(fullfile(ops.dataRoot{folder},sprintf('100_CH%d.continuous', 1+ops.ElectrodeStart)),'file') 
+           fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('100_CH%d.continuous', j+ops.ElectrodeStart) )); % Added +16 because using ch 17-48  
         %%%% This condition account for recordings done on Liad's rig.%%%%
-        elseif exist(fullfile(ops.dataRoot{folder},'107_CH17.continuous'),'file') 
-            fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('107_CH%d.continuous', j+16) )); % Added +16 because using ch 17-48  
+        elseif exist(fullfile(ops.dataRoot{folder},sprintf('104_CH%d.continuous', 1+ops.ElectrodeStart)),'file') 
+            fs{j} = dir(fullfile(ops.dataRoot{folder}, sprintf('104_CH%d.continuous', j+ops.ElectrodeStart) )); % Added +16 because using ch 17-48  
         end
     end
     nblocks = cellfun(@(x) numel(x), fs);
@@ -73,7 +73,7 @@ for folder=1:size(ops.dataRoot,1)
             samples         = samples';
 
             if ops.reorderChannels
-                samples=samples(ops.ElectrodeMap-16,:);
+                samples=samples(ops.ElectrodeMap-ops.ElectrodeStart,:);
             end
             
             fwrite(fidout, samples, 'int16');

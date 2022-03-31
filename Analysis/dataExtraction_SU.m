@@ -13,6 +13,7 @@ recID=unique(recordings.MouseID);
 mouseID=[];
 optotagging=[];
 brainArea=[];
+state=[];
 
 suid=[];
 suage=[];
@@ -38,6 +39,13 @@ PSTHvisualK=[];
 responseVisualK=[];
 PSTHwhiskerK=[];
 responseWhiskerK=[];
+reliabilityVisual=[];
+reliabilityVisual_K=[];
+fanoVisual=[];
+fanoVisual_K=[];
+fanoVisualOpto=[];
+fanoWhisker=[];
+fanoWhisker_K=[];
 
 baseline_PPC=[];
 baseline_vectorLength=[];
@@ -63,6 +71,11 @@ rw_baselineFiring_K=[];
 rw_rho_K=[];
 baseline_firing_K=[];
 
+sb_spikeProb=[];
+sb_entrainedP=[];
+sb_spikeProb_K=[];
+sb_entrainedP_K=[];
+
 coherence_K=[];
 
 for i=1:numel(recID)
@@ -74,6 +87,8 @@ for i=1:numel(recID)
         recFolder=recFolder{1};
         Area=recordings.BrainArea(strcmp(recordings.MouseID,recID{i}),:);
         Area=Area{1};
+        State=recordings.State(strcmp(recordings.MouseID,recID{i}),:);
+        State=State{1};
         
         dir=fullfile(recFolder,recID{i});
         load(fullfile(dir,'processData.mat'),'results')
@@ -85,12 +100,15 @@ for i=1:numel(recID)
         tagging(:)={thisTagging};
         thisBrainArea=cell(numel(results.s.suid),1);
         thisBrainArea(:)={Area};
+        thisState=cell(numel(results.s.suid),1);
+        thisState(:)={State};  
         
         %% Spike features
         mouseID=[mouseID;thisID];
         optotagging=[optotagging;tagging];
         brainArea=[brainArea;thisBrainArea];
-        
+        state=[state;thisState];
+
         suid=[suid;results.s.suid];
         suage=[suage;results.s.suage];
         sulayer=[sulayer;results.s.sulayer];
@@ -104,27 +122,38 @@ for i=1:numel(recID)
 
         %% PSTH        
         tmpPSTHvisual=nan(numel(results.s.suid),2000);
-        tmpresponseVisual=nan(numel(results.s.suid),20);
+        tmpresponseVisual=nan(numel(results.s.suid),1);
         tmpPSTHwhisker=nan(numel(results.s.suid),2000);
         tmpresponseWhisker=nan(numel(results.s.suid),1);        
         tmpPSTHoptotagging=nan(numel(results.s.suid),2000);
         tmpresponseTag=nan(numel(results.s.suid),1);
         tmpPSTHvisualOpto=nan(numel(results.s.suid),2000);
-        tmpresponseVisualOpto=nan(numel(results.s.suid),20);
+        tmpresponseVisualOpto=nan(numel(results.s.suid),1);
         tmpPSTHlaser=nan(numel(results.s.suid),2000);
         tmpresponseLaser=nan(numel(results.s.suid),2);
         tmpPSTHvisual_K=nan(numel(results.s.suid),2000);
-        tmpresponseVisualK=nan(numel(results.s.suid),20);
+        tmpresponseVisualK=nan(numel(results.s.suid),1);
         tmpPSTHwhisker_K=nan(numel(results.s.suid),2000);
         tmpresponseWhisker_K=nan(numel(results.s.suid),1);
+        tmpreliabilityVisual=nan(numel(results.s.suid),1);
+        tmpreliabilityVisual_K=nan(numel(results.s.suid),1);
+        tmpFanoVisual=nan(numel(results.s.suid),1);
+        tmpFanoVisual_K=nan(numel(results.s.suid),1);
+        tmpFanoVisualOpto=nan(numel(results.s.suid),1);
+        tmpFanoWhisker=nan(numel(results.s.suid),1);
+        tmpFanoWhisker_K=nan(numel(results.s.suid),1);
+
         
         if isfield(results.s,'PSTHvisual') && ~isempty(results.s.PSTHvisual)
             tmpPSTHvisual=results.s.PSTHvisual;
             tmpresponseVisual=results.s.response.visual;
+            tmpreliabilityVisual=results.s.reliability.visual';
+            tmpFanoVisual=results.s.fano.visual';
         end        
         if isfield(results.s,'PSTHwhisker') && ~isempty(results.s.PSTHwhisker)
             tmpPSTHwhisker=results.s.PSTHwhisker;
             tmpresponseWhisker=results.s.response.whisker;
+            tmpFanoWhisker=results.s.fano.whisker';
         end      
         if isfield(results.s,'PSTHoptotagging') && ~isempty(results.s.PSTHoptotagging)
             tmpPSTHoptotagging=results.s.PSTHoptotagging;
@@ -133,6 +162,7 @@ for i=1:numel(recID)
         if isfield(results.s,'PSTHvisualOpto') && ~isempty(results.s.PSTHvisualOpto)
             tmpPSTHvisualOpto=results.s.PSTHvisualOpto;
             tmpresponseVisualOpto=results.s.response.visualOpto;
+            tmpFanoVisualOpto=results.s.fano.visualOpto';
         end
         if isfield(results.s,'PSTHlaser') && ~isempty(results.s.PSTHlaser)
             tmpPSTHlaser=results.s.PSTHlaser;
@@ -141,10 +171,13 @@ for i=1:numel(recID)
         if isfield(results.s,'PSTHvisual_K') && ~isempty(results.s.PSTHvisual_K)
             tmpPSTHvisual_K=results.s.PSTHvisual_K;
             tmpresponseVisualK=results.s.response.visual_K;
+            tmpreliabilityVisual_K=results.s.reliability.visual_K';
+            tmpFanoVisual_K=results.s.fano.visual_K';
         end
         if isfield(results.s,'PSTHwhisker_K') && ~isempty(results.s.PSTHwhisker_K)
             tmpPSTHwhisker_K=results.s.PSTHwhisker_K;
             tmpresponseWhisker_K=results.s.response.whisker_K;
+            tmpFanoWhisker_K=results.s.fano.whisker_K';
         end
         
         PSTHvisual=[PSTHvisual;tmpPSTHvisual];
@@ -161,7 +194,14 @@ for i=1:numel(recID)
         responseVisualK=[responseVisualK;tmpresponseVisualK];
         PSTHwhiskerK=[PSTHwhiskerK;tmpPSTHwhisker_K];
         responseWhiskerK=[responseWhiskerK;tmpresponseWhisker_K];  
-        
+        reliabilityVisual=[reliabilityVisual;tmpreliabilityVisual];
+        reliabilityVisual_K=[reliabilityVisual_K;tmpreliabilityVisual_K];
+        fanoVisual=[fanoVisual;tmpFanoVisual];
+        fanoVisualOpto=[fanoVisualOpto;tmpFanoVisualOpto];
+        fanoVisual_K=[fanoVisual_K;tmpFanoVisual_K];
+        fanoWhisker=[fanoWhisker;tmpFanoWhisker];
+        fanoWhisker_K=[fanoWhisker_K;tmpFanoWhisker_K];
+
         %% Control    
         % PPC
         baseline_PPC=[baseline_PPC;results.baseline.phaseLocking.PPC];
@@ -179,11 +219,20 @@ for i=1:numel(recID)
         % RW
         if isfield(results.evokedLFP,'rw')
             rw_p=[];
+            responsive=[];
             for unit=1:numel(results.s.suid)
-                rw_p(unit,1)=signrank(results.evokedLFP.rw.baselineFiringFreq(unit,:)',results.evokedLFP.rw.firingFreq(unit,:));
+                rw_p=signrank(results.evokedLFP.rw.baselineFiringFreq(unit,:)',results.evokedLFP.rw.firingFreq(unit,:)');
+                meanRWfiring=mean(results.evokedLFP.rw.firingFreq(unit,:));
+                meanBaselineFiring=mean(results.evokedLFP.rw.baselineFiringFreq(unit,:),2);
+                
+                if (rw_p<=0.05) && (meanRWfiring>meanBaselineFiring)
+                    responsive(unit,1) = 1;
+                else
+                    responsive(unit,1) = 0;
+                end
             end
-            responsive=zeros(numel(results.s.suid),1);
-            responsive(rw_p<=0.05)=1;
+%             responsive=zeros(numel(results.s.suid),1);
+%             responsive(rw_p<=0.05 & mean(results.evokedLFP.rw.firingFreq,2)>mean(results.evokedLFP.rw.baselineFiringFreq,2))=1;
 
             rw_responsive=[rw_responsive;responsive];
             rw_firing=[rw_firing;mean(results.evokedLFP.rw.firingFreq,2)];
@@ -198,10 +247,19 @@ for i=1:numel(recID)
         
         baseline_firing=[baseline_firing;results.baseline.singleUnitFiringFrequency];
         
+        % SB
+        if size(results.baseline.spindleBurst.spikeProbability,1)==1
+            sb_spikeProb=[sb_spikeProb;results.baseline.spindleBurst.spikeProbability'];
+            sb_entrainedP=[sb_entrainedP;results.baseline.spindleBurst.unitEntrained_p'];
+        else
+            sb_spikeProb=[sb_spikeProb;results.baseline.spindleBurst.spikeProbability];
+            sb_entrainedP=[sb_entrainedP;results.baseline.spindleBurst.unitEntrained_p];
+        end
         
         %% Chemogenetic
     if isfield(results,'SalB')
-            % PPC
+    if isfield(results.SalB.baseline,'durationBaseline')
+       % PPC
             baseline_PPC_K=[baseline_PPC_K;results.SalB.baseline.phaseLocking.PPC];
             baseline_vectorLength_K=[baseline_vectorLength_K;results.SalB.baseline.phaseLocking.vectorLength];
             baseline_vectorAngle_K=[baseline_vectorAngle_K;results.SalB.baseline.phaseLocking.vectorAngle];
@@ -216,12 +274,18 @@ for i=1:numel(recID)
             % RW
             if isfield(results.SalB.evokedLFP,'rw')
                 rw_p_K=[];
+                responsive_K=[];
                 for unit=1:numel(results.s.suid)
-                    rw_p_K(unit,1)=signrank(results.SalB.evokedLFP.rw.baselineFiringFreq(unit,:)',results.SalB.evokedLFP.rw.firingFreq(unit,:));
-                end
-                responsive_K=zeros(numel(results.s.suid),1);
-                responsive_K(rw_p_K<=0.05)=1;
+                    rw_p_K=signrank(results.SalB.evokedLFP.rw.baselineFiringFreq(unit,:)',results.SalB.evokedLFP.rw.firingFreq(unit,:)');
+                    meanRWfiring_K=mean(results.SalB.evokedLFP.rw.firingFreq(unit,:));
+                    meanBaselineFiring_K=mean(results.SalB.evokedLFP.rw.baselineFiringFreq(unit,:),2);
 
+                    if (rw_p_K<=0.05) && (meanRWfiring_K>meanBaselineFiring_K)
+                        responsive_K(unit,1) = 1;
+                    else
+                        responsive_K(unit,1) = 0;
+                    end
+                end
                 rw_responsive_K=[rw_responsive_K;responsive_K];
                 rw_firing_K=[rw_firing_K;mean(results.SalB.evokedLFP.rw.firingFreq,2)];
                 rw_baselineFiring_K=[rw_baselineFiring_K;mean(results.SalB.evokedLFP.rw.baselineFiringFreq,2)];
@@ -234,6 +298,15 @@ for i=1:numel(recID)
             end
 
             baseline_firing_K=[baseline_firing_K;results.SalB.baseline.singleUnitFiringFrequency];
+            if size(results.SalB.baseline.spindleBurst.spikeProbability,1)==1
+                sb_spikeProb_K=[sb_spikeProb_K;results.SalB.baseline.spindleBurst.spikeProbability'];
+                sb_entrainedP_K=[sb_entrainedP_K;results.SalB.baseline.spindleBurst.unitEntrained_p'];
+            else
+                sb_spikeProb_K=[sb_spikeProb_K;results.SalB.baseline.spindleBurst.spikeProbability];
+                sb_entrainedP_K=[sb_entrainedP_K;results.SalB.baseline.spindleBurst.unitEntrained_p];
+            end
+            
+            
     else
         baseline_PPC_K=[baseline_PPC_K;nan(numel(results.s.suid),3)];
         baseline_vectorLength_K=[baseline_vectorLength_K;nan(numel(results.s.suid),3)];
@@ -244,6 +317,21 @@ for i=1:numel(recID)
         rw_baselineFiring_K=[rw_baselineFiring_K;nan(numel(results.s.suid),1)];
         rw_rho_K=[rw_rho_K;nan(numel(results.s.suid),16)];
         baseline_firing_K=[baseline_firing_K;nan(numel(results.s.suid),1)];
+        sb_spikeProb_K=[sb_spikeProb_K;nan(numel(results.s.suid),1)];
+        sb_entrainedP_K=[sb_entrainedP_K;nan(numel(results.s.suid),1)];
+    end
+        else
+        baseline_PPC_K=[baseline_PPC_K;nan(numel(results.s.suid),3)];
+        baseline_vectorLength_K=[baseline_vectorLength_K;nan(numel(results.s.suid),3)];
+        baseline_vectorAngle_K=[baseline_vectorAngle_K;nan(numel(results.s.suid),3)];
+        baseline_pValuePPC_K=[baseline_pValuePPC_K;nan(numel(results.s.suid),3)];
+        rw_responsive_K=[rw_responsive_K;nan(numel(results.s.suid),1)];
+        rw_firing_K=[rw_firing_K;nan(numel(results.s.suid),1)];
+        rw_baselineFiring_K=[rw_baselineFiring_K;nan(numel(results.s.suid),1)];
+        rw_rho_K=[rw_rho_K;nan(numel(results.s.suid),16)];
+        baseline_firing_K=[baseline_firing_K;nan(numel(results.s.suid),1)];
+        sb_spikeProb_K=[sb_spikeProb_K;nan(numel(results.s.suid),1)];
+        sb_entrainedP_K=[sb_entrainedP_K;nan(numel(results.s.suid),1)];    
     end
 end
 
@@ -263,6 +351,7 @@ data=table;
 data.MouseID=categorical(mouseID);
 data.Tagging=categorical(optotagging);
 data.brainArea=categorical(cellstr(brainArea));
+data.state=categorical(cellstr(state));
 data.suid=suid;
 data.Age=suage;
 data.Layer=sulayer;
@@ -283,6 +372,14 @@ data.responseWhisker=responseWhisker;
 data.responseTag=responseTag;
 data.responseVisualOpto=responseVisualOpto;
 data.responseLaser=responseLaser;
+data.reliabilityVisual=reliabilityVisual;
+data.reliabilityVisual_K=reliabilityVisual_K;
+data.fanoVisual=fanoVisual;
+data.fanoVisualOpto=fanoVisualOpto;
+data.fanoVisual_K=fanoVisual_K;
+data.fanoWhisker=fanoWhisker;
+data.fanoWhisker_K=fanoWhisker_K;
+
 data.PPC=baseline_PPC;
 data.vectorLength=baseline_vectorLength;
 data.vectorAngle=baseline_vectorAngle;
@@ -293,6 +390,8 @@ data.rw_firing=rw_firing;
 data.rw_baselineFiring=rw_baselineFiring;
 data.rw_rho=rw_rho;
 data.baseline_firing=baseline_firing;
+data.sb_spikeProb=sb_spikeProb;
+data.sb_entrainedP=sb_entrainedP;
 
 data.PSTHvisual_K=PSTHvisualK;
 data.responseVisual_K=responseVisualK;
@@ -308,6 +407,8 @@ data.rw_firing_K=rw_firing_K;
 data.rw_baselineFiring_K=rw_baselineFiring_K;
 data.rw_rho_K=rw_rho_K;
 data.baseline_firing_K=baseline_firing_K;
+data.sb_spikeProb_K=sb_spikeProb_K;
+data.sb_entrainedP_K=sb_entrainedP_K;
 
 %% Save
 save('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData.mat', 'data', 'PSTHbins', 'rwFreq')

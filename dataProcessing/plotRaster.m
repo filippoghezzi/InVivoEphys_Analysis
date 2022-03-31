@@ -11,7 +11,7 @@ function plotRaster(raster,s,condition,varargin)
         ax=gca;        
         if strcmp(condition,'Visual') || strcmp(condition,'Visual_K')      
             patch([0 100 100 0],[0 0 size(raster,2) size(raster,2)],'y','FaceAlpha',.3,'EdgeColor','none')
-            ax.XLim=[-100, 1100];
+            ax.XLim=[-1000, 4000];
             
         elseif strcmp(condition,'Optotagging')
             patch([0 50 50 0],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
@@ -20,12 +20,13 @@ function plotRaster(raster,s,condition,varargin)
         elseif strcmp(condition,'VisualOpto')
             patch([0 100 100 0],[0 0 size(raster,2) size(raster,2)],'y','FaceAlpha',.3,'EdgeColor','none')
             patch([-50 150 150 -50],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
-            ax.XLim=[-100, 1100];
+            ax.XLim=[-1000, 4000];
         
         elseif strcmp(condition,'LaserOnly')
             patch([-50 150 150 -50],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
-            ax.XLim=[-100, 1100];
+            ax.XLim=[-1000, 4000];
         end
+%             ax.XLim=[-1000, 4000];
 
         hold off
         ax.YLim=[0, size(raster,2)];

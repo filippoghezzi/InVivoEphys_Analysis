@@ -20,7 +20,7 @@ function stim=getStimuli(ops,data)
             endSamples=startSamples+ops.nSamplesBlocks(file);
         end 
         
-        [laser,ledR,laserAndLedR,ledL,whiskerStim]=loadOpenEphysEvents(data.Experiment{file},startSamples);
+        [laser,ledR,laserAndLedR,ledL,whiskerStim]=loadOpenEphysEvents(data.Experiment{file},startSamples, ops.ElectrodeStart);
        
         if strcmp(data.Protocol{file},'VisualFlash_Opto')
             stim.ledR=[stim.ledR;ledR];

@@ -21,12 +21,24 @@ for recording=1:length(IDs)
         
     if ~exist(fullfile(dirOUT,'RawData.dat'),'file')
         %% Load electrode map
+        ops.reorderChannels = 1;
         if strcmp(mouseData.Electrode{1},'A1x32')
             load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\A1x32_Map.mat');
+            ops.ElectrodeStart = 16;
         elseif strcmp(mouseData.Electrode{1},'OA1x32')
             load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\OA1x32_Map.mat');
+            ops.ElectrodeStart = 16;
         elseif strcmp(mouseData.Electrode{1},'A1x32_Poly3')
             load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\A1x32_Poly3_Map.mat');
+            ops.ElectrodeStart = 16;
+        elseif strcmp(mouseData.Electrode{1},'A1x32_Intan32')
+            load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\A1x32_Intan32_Map.mat');
+            ops.ElectrodeStart = 64;
+        elseif strcmp(mouseData.Electrode{1},'A1x32_NH')
+            load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\ElectrodeMaps\A1x32_Map.mat');
+            ops.ElectrodeStart = 0;
+            ElectrodeMap=ElectrodeMap-16;
+            ops.reorderChannels = 0;
         end
         ops.ElectrodeMap=ElectrodeMap; 
 

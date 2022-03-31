@@ -13,7 +13,6 @@ function ops = makeBinary(ops,dirIN,dirOUT)
     ops.dataRoot=dirIN;
     ops.binaryRoot=dirOUT;
     ops.fbinary             = 'RawData'; 
-    ops.reorderChannels = 1;
     
     %% Convert OpenEphys data to binary data
     ops = openEphys2Binary(ops);

@@ -21,13 +21,13 @@ function spectrogram = InVivo_dataProcessing_evokedLFP_spectrogram(data,ops,wind
     ax_spectrogram=subplot(1,1,1);
     matlab.graphics.interaction.disableDefaultAxesInteractions(ax_spectrogram);
     hs = surface('Parent',ax_spectrogram,...
-        'XData',[min(time) max(time)],'YData',[max(f(f<200)) min(f(f<200))],...
+        'XData',[0 3],'YData',[max(f(f<200)) min(f(f<200))],...
         'CData',zscore(CFS(f<200,:),[],2), 'ZData', zeros(2,2), ...
          'CDataMapping','scaled', 'FaceColor','texturemap', 'EdgeColor', 'none');
     ax_spectrogram.CLim=[0,5];
     ax_spectrogram.YLim = [1,50];
     ax_spectrogram.YMinorTick = 'on';
-    ax_spectrogram.XLim = [-1000 5000];
+%     ax_spectrogram.XLim = [-1000 5000];
     ax_spectrogram.Layer = 'top';
     ax_spectrogram.YDir = 'normal';
     ax_spectrogram.YTick = [1,2,3,5,10,20,30,50,100];

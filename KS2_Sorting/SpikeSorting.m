@@ -1,5 +1,5 @@
 clear 
-close all
+% close all
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\spikes'))
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\npy-matlab'))
 mainSortingDir='C:\Users\Butt Lab\Documents\SpikeSorting';

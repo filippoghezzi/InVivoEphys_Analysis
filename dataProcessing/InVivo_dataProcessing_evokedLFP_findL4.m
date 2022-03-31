@@ -132,7 +132,7 @@ function ops=InVivo_dataProcessing_evokedLFP_findL4(eLFP,CSD,MUA,ops)
         % Re-plot interpolated CSD
         ax_csd=subplot(1,3,2);
         imagesc(time,(1:size(CSD.interp,1)),CSD.interp,[min(CSD.interp(:))/5,max(CSD.interp(:))/5]);
-        ax_csd.XLim=[-50 250];
+        ax_csd.XLim=[-50 1000];
         colormap(flipud(jet));    
         ax_csd.XLabel.String='Time (ms)';
         ax_csd.YLabel.String='Depth (\mum)';
@@ -156,7 +156,7 @@ function ops=InVivo_dataProcessing_evokedLFP_findL4(eLFP,CSD,MUA,ops)
 
         % Re-plot interpolated MUA
         ax_mua=subplot(1,3,3);
-        ax_mua.XLim=[-50 250];
+        ax_mua.XLim=[-50 500];
         colormap(ax_mua,'hot')
         ax_mua.XLabel.String='Time (ms)';
         c_mua = colorbar('Location','eastoutside');

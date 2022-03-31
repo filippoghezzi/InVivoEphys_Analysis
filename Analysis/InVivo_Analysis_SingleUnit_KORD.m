@@ -2,7 +2,7 @@ close all
 clear 
 clc
 
-addpath(genpath('C:\Users\Filippo\Documents\GitHub\InVivoEphys_Analysis')) 
+addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis')) 
 load('SingleUnitData.mat')
 data.PSTHvisualOpto=[];
 data.PSTHlaser=[];
@@ -11,13 +11,15 @@ data.responseLaser=[];
 % data1=data;
 % load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData_Part2.mat')
 % data=[data1;data];
-folderFigures='C:\Users\Filippo\Desktop\Figures_InVivo';
+folderFigures='C:\Users\Butt Lab\Desktop\Figures_InVivo';
 
 %% Set group logic arrays
 goodRecs=categorical(cellstr({'K6', 'K24', 'K35', 'K36', 'K38', 'K39', 'K43', 'K44', 'K45', 'K47', 'K48', 'K51', 'K52', 'K54', 'K55', 'K56', 'K58'}));
+controlRecs=categorical(cellstr({'K20','K21','K23','K37','K41','K42','K46','K50','K53'}));
+
 data=data(~isnan(data.endSlope),:);
 data=data(data.Tagging=='SST;KORD',:);
-data=data(ismember(data.MouseID,goodRecs),:);
+% data=data(ismember(data.MouseID,goodRecs),:);
 
 
 % data=data(data.brainArea=='V1',:);
@@ -45,6 +47,9 @@ sizeS1young=height(data(S1&P9P13,:));
 sizeS1old=height(data(S1&P14P18,:));
 sizeV1young=height(data(V1&P9P13,:));
 sizeV1old=height(data(V1&P14P18,:));
+
+KORD=ismember(data.MouseID,goodRecs);
+control=ismember(data.MouseID,controlRecs);
 
 %% Baseline firing
 cats={'V1 P9-P13','V1 P14-P18','S1 P9-P13','S1 P14-P18'};
@@ -85,11 +90,71 @@ ax2.YLabel.String='Baseline firing (Hz)';
 figure
 data.baseline_firing_norm=log2(data.baseline_firing_K./(data.baseline_firing+0.001));
 hold on
-plot(ones(sizeV1young,1),data(V1&P9P13,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
-plot(ones(sizeV1old,1)*2,data(V1&P14P18,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
-plot(ones(sizeS1young,1)*3,data(S1&P9P13,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
-plot(ones(sizeS1old,1)*4,data(S1&P14P18,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
-errorbar([1,2,3,4]+0.1,[mean(data(V1&P9P13,:).baseline_firing_norm),mean(data(V1&P14P18,:).baseline_firing_norm),mean(data(S1&P9P13,:).baseline_firing_norm),mean(data(S1&P14P18,:).baseline_firing_norm)]',[std(data(V1&P9P13,:).baseline_firing_norm),std(data(V1&P14P18,:).baseline_firing_norm),std(data(S1&P9P13,:).baseline_firing_norm),std(data(S1&P14P18,:).baseline_firing_norm)]','ko')
+plot(ones(height(data(V1&P9P13&KORD,:)),1),data(V1&P9P13&KORD,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
+plot(ones(height(data(V1&P14P18&KORD,:)),1)*2,data(V1&P14P18&KORD,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
+plot(ones(height(data(S1&P9P13&KORD,:)),1)*3,data(S1&P9P13&KORD,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
+plot(ones(height(data(S1&P14P18&KORD,:)),1)*4,data(S1&P14P18&KORD,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
+errorbar([1,2,3,4]+0.1,[mean(data(V1&P9P13&KORD,:).baseline_firing_norm),mean(data(V1&P14P18&KORD,:).baseline_firing_norm),mean(data(S1&P9P13&KORD,:).baseline_firing_norm),mean(data(S1&P14P18&KORD,:).baseline_firing_norm)]',[std(data(V1&P9P13&KORD,:).baseline_firing_norm),std(data(V1&P14P18&KORD,:).baseline_firing_norm),std(data(S1&P9P13&KORD,:).baseline_firing_norm),std(data(S1&P14P18&KORD,:).baseline_firing_norm)]','ko')
+plot(ones(height(data(V1&P9P13&control,:)),1)*1.2,data(V1&P9P13&control,:).baseline_firing_norm,'o','Color',[227,26,28]/255)
+plot(ones(height(data(V1&P14P18&control,:)),1)*2.2,data(V1&P14P18&control,:).baseline_firing_norm,'o','Color',[227,26,28]/255)
+plot(ones(height(data(S1&P9P13&control,:)),1)*3.2,data(S1&P9P13&control,:).baseline_firing_norm,'o','Color',[227,26,28]/255)
+plot(ones(height(data(S1&P14P18&control,:)),1)*4.2,data(S1&P14P18&control,:).baseline_firing_norm,'o','Color',[227,26,28]/255)
+errorbar([1,2,3,4]+0.3,[mean(data(V1&P9P13&control,:).baseline_firing_norm),mean(data(V1&P14P18&control,:).baseline_firing_norm),mean(data(S1&P9P13&control,:).baseline_firing_norm),mean(data(S1&P14P18&control,:).baseline_firing_norm)]',[std(data(V1&P9P13&control,:).baseline_firing_norm),std(data(V1&P14P18&control,:).baseline_firing_norm),std(data(S1&P9P13&control,:).baseline_firing_norm),std(data(S1&P14P18&control,:).baseline_firing_norm)]','ro')
+ax=gca;
+ax.XLim=[.5,4.5];
+ax.XTick=[1,2,3,4];
+ax.XTickLabel=cats;
+ax.YLabel.String='Baseline firing Change (log_2 ratio)';
+
+%% Baseline firing
+cats={'V1 P9-P13','V1 P14-P18','S1 P9-P13','S1 P14-P18'};
+
+figure
+ax1=subplot(2,2,1);
+hold on
+plot([data(V1&P9P13,:).reliabilityVisual,data(V1&P9P13,:).reliabilityVisual_K]','-o','Color',[189,189,189]/255)
+errorbar([1,2]+.1,[mean(data(V1&P9P13,:).reliabilityVisual),mean(data(V1&P9P13,:).reliabilityVisual_K)]',[std(data(V1&P9P13,:).reliabilityVisual),std(data(V1&P9P13,:).reliabilityVisual_K)]','k-o')
+ax1.XLim=[.5,2.5];
+ax1.Title.String='V1 P9-P13';
+ax1.YLabel.String='Reliability';
+
+ax2=subplot(2,2,2);
+hold on
+plot([data(V1&P14P18,:).reliabilityVisual,data(V1&P14P18,:).reliabilityVisual_K]','-o','Color',[189,189,189]/255)
+errorbar([1,2]+.1,[mean(data(V1&P14P18,:).reliabilityVisual),mean(data(V1&P14P18,:).reliabilityVisual_K)]',[std(data(V1&P14P18,:).reliabilityVisual),std(data(V1&P14P18,:).reliabilityVisual_K)]','k-o')
+ax2.XLim=[.5,2.5];
+ax2.Title.String='V1 P14-P18';
+ax1.YLabel.String='Reliability';
+
+ax1=subplot(2,2,3);
+hold on
+plot([data(S1&P9P13,:).baseline_firing,data(S1&P9P13,:).baseline_firing_K]','-o','Color',[189,189,189]/255)
+errorbar([1,2]+.1,[mean(data(S1&P9P13,:).baseline_firing),mean(data(S1&P9P13,:).baseline_firing_K)]',[std(data(S1&P9P13,:).baseline_firing),std(data(S1&P9P13,:).baseline_firing_K)]','k-o')
+ax1.XLim=[.5,2.5];
+ax1.Title.String='V1 P9-P13';
+ax1.YLabel.String='Baseline firing (Hz)';
+
+ax2=subplot(2,2,4);
+hold on
+plot([data(S1&P14P18,:).baseline_firing,data(S1&P14P18,:).baseline_firing_K]','-o','Color',[189,189,189]/255)
+errorbar([1,2]+.1,[mean(data(S1&P14P18,:).baseline_firing),mean(data(S1&P14P18,:).baseline_firing_K)]',[std(data(S1&P14P18,:).baseline_firing),std(data(S1&P14P18,:).baseline_firing_K)]','k-o')
+ax2.XLim=[.5,2.5];
+ax2.Title.String='V1 P14-P18';
+ax2.YLabel.String='Baseline firing (Hz)';
+
+figure
+data.baseline_firing_norm=log2(data.baseline_firing_K./(data.baseline_firing+0.001));
+hold on
+plot(ones(height(data(V1&P9P13&KORD,:)),1),data(V1&P9P13&KORD,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
+plot(ones(height(data(V1&P14P18&KORD,:)),1)*2,data(V1&P14P18&KORD,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
+plot(ones(height(data(S1&P9P13&KORD,:)),1)*3,data(S1&P9P13&KORD,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
+plot(ones(height(data(S1&P14P18&KORD,:)),1)*4,data(S1&P14P18&KORD,:).baseline_firing_norm,'o','Color',[189,189,189]/255)
+errorbar([1,2,3,4]+0.1,[mean(data(V1&P9P13&KORD,:).baseline_firing_norm),mean(data(V1&P14P18&KORD,:).baseline_firing_norm),mean(data(S1&P9P13&KORD,:).baseline_firing_norm),mean(data(S1&P14P18&KORD,:).baseline_firing_norm)]',[std(data(V1&P9P13&KORD,:).baseline_firing_norm),std(data(V1&P14P18&KORD,:).baseline_firing_norm),std(data(S1&P9P13&KORD,:).baseline_firing_norm),std(data(S1&P14P18&KORD,:).baseline_firing_norm)]','ko')
+plot(ones(height(data(V1&P9P13&control,:)),1)*1.2,data(V1&P9P13&control,:).baseline_firing_norm,'o','Color',[227,26,28]/255)
+plot(ones(height(data(V1&P14P18&control,:)),1)*2.2,data(V1&P14P18&control,:).baseline_firing_norm,'o','Color',[227,26,28]/255)
+plot(ones(height(data(S1&P9P13&control,:)),1)*3.2,data(S1&P9P13&control,:).baseline_firing_norm,'o','Color',[227,26,28]/255)
+plot(ones(height(data(S1&P14P18&control,:)),1)*4.2,data(S1&P14P18&control,:).baseline_firing_norm,'o','Color',[227,26,28]/255)
+errorbar([1,2,3,4]+0.3,[mean(data(V1&P9P13&control,:).baseline_firing_norm),mean(data(V1&P14P18&control,:).baseline_firing_norm),mean(data(S1&P9P13&control,:).baseline_firing_norm),mean(data(S1&P14P18&control,:).baseline_firing_norm)]',[std(data(V1&P9P13&control,:).baseline_firing_norm),std(data(V1&P14P18&control,:).baseline_firing_norm),std(data(S1&P9P13&control,:).baseline_firing_norm),std(data(S1&P14P18&control,:).baseline_firing_norm)]','ro')
 ax=gca;
 ax.XLim=[.5,4.5];
 ax.XTick=[1,2,3,4];

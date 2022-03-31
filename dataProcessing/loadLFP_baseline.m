@@ -10,7 +10,7 @@ function LFP=loadLFP_baseline(binaryFilename,fs,chanN,startBaseline,endBaseline,
 %   fs -> sampling frequency;
 %   chanN -> total number of channels;
 %   window -> [pre post] values (in seconds) related to stimuli values to collect LFP
-%   varargin -> empty for LFP without filtering, 'LFP' for [0 150] Hz bandpass signal; 'MUA' for [400 4000] Hz bandpass signal.
+%   varargin -> empty for LFP without filtering, 'LFP' for [0 100] Hz bandpass signal; 'MUA' for [400 4000] Hz bandpass signal.
     
     fprintf(strcat('Loading LFP ...','\n'))
 
@@ -20,7 +20,7 @@ function LFP=loadLFP_baseline(binaryFilename,fs,chanN,startBaseline,endBaseline,
     elseif size(varargin,1)==1
         doFiltering=true;
         if strcmp(varargin{1},'LFP')
-            [b,a]=butter(3,150/(fs/2),'low');
+            [b,a]=butter(3,100/(fs/2),'low');
         elseif strcmp(varargin{1},'MUA')
             [b,a]=butter(3,[400 4000]/(fs/2),'bandpass');
         end

@@ -20,5 +20,5 @@ function [results,ops]=InVivo_dataProcessing_evokedLFP(ops,s,stim,condition)
         results.rw=InVivo_dataProcessing_evokedLFP_retinalWave(ops,s,eLFP,stim);
     end
     
-    results.spectrogram=InVivo_dataProcessing_evokedLFP_spectrogram(squeeze(eLFP(ops.L4best,:,:)),ops, ops.LFPwindow);
+%     results.spectrogram=InVivo_dataProcessing_evokedLFP_spectrogram(squeeze(eLFP(ops.L4best,:,:)),ops, ops.LFPwindow);
 end

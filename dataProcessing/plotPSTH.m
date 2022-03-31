@@ -27,7 +27,7 @@ function plotPSTH(s,condition,varargin)
         
         if strcmp(condition,'Visual') || strcmp(condition,'Visual_K')       
             patch([0 100 100 0],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'y','FaceAlpha',.3,'EdgeColor','none')
-            ax.XLim=[-100, 1100];
+            ax.XLim=[-1000, 4000];
             
         elseif strcmp(condition,'Optotagging')
             patch([0 50 50 0],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'c','FaceAlpha',.1,'EdgeColor','none')
@@ -36,14 +36,15 @@ function plotPSTH(s,condition,varargin)
         elseif strcmp(condition,'VisualOpto')
             patch([0 100 100 0],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'y','FaceAlpha',.3,'EdgeColor','none')
             patch([-50 150 150 -50],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'c','FaceAlpha',.1,'EdgeColor','none')
-            ax.XLim=[-100, 1100];
+            ax.XLim=[-1000, 4000];
         
         elseif strcmp(condition,'LaserOnly')
             patch([-50 150 150 -50],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'c','FaceAlpha',.1,'EdgeColor','none')
-            ax.XLim=[-100, 1100];
+            ax.XLim=[-1000, 4000];
         end
         
-        ax.YLim=[0, max(PSTH(suIdx,:))+1];
+
+        ax.YLim=[0, 50];
         hold off
         box off
         

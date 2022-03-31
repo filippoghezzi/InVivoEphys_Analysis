@@ -1,18 +1,11 @@
-function s=InVivo_dataProcessing_singleUnits_getTemplateFeatures(s,ops,varargin)
+function s=InVivo_dataProcessing_singleUnits_getTemplateFeatures(s,ops)
     
     wf=s.suWf;
     suid=s.suid;
     fs=ops.fs;
     fshigh=ops.fshigh;
+    verbose=ops.verbose;
     
-    if size(varargin,2)==1
-        verbose = varargin{1,1};
-    elseif size(varargin,2)==2
-        verbose=varargin{1,1};
-        folder=varargin{1,2};
-    else
-        verbose=0;
-    end
     if verbose
         figure('units','normalized','outerposition',[0 0 1 1]);
     end
@@ -69,8 +62,8 @@ function s=InVivo_dataProcessing_singleUnits_getTemplateFeatures(s,ops,varargin)
         end
     end 
     
-    if verbose && size(varargin,2)==2
-        figname=fullfile(folder,'Waveforms');
+    if verbose 
+        figname=fullfile(ops.dirOUT,'Waveforms');
         export_fig(figname,'-tiff','-transparent')
         close 
     end

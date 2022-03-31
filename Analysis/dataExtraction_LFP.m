@@ -14,6 +14,7 @@ mouseID=[];
 optotagging=[];
 mouseAge=[];
 brainArea=[];
+state=[];
 
 MUA_L4=[];
 MUA_L4_peakFast=[];
@@ -26,6 +27,7 @@ LFP_L4_latency=[];
 SB_L4_power=[];
 SB_L4_duration=[];
 SB_L4_frequency=[];
+PSD=[];
 
 MUA_L4_K=[];
 MUA_L4_peakFast_K=[];
@@ -38,6 +40,7 @@ LFP_L4_latency_K=[];
 SB_L4_power_K=[];
 SB_L4_duration_K=[];
 SB_L4_frequency_K=[];
+PSD_K=[];
 
 for i=1:numel(recID)
     fprintf(strcat('Looking into ...',recID{i},'\n'))
@@ -50,6 +53,8 @@ for i=1:numel(recID)
     Age=Age(1);
     Area=recordings.BrainArea(strcmp(recordings.MouseID,recID{i}),:);
     Area=categorical(cellstr((Area{1})));
+    State=recordings.State(strcmp(recordings.MouseID,recID{i}),:);
+    State=categorical(cellstr((State{1})));
     
     dir=fullfile(recFolder,recID{i});
     load(fullfile(dir,'processData.mat'),'results')
@@ -59,6 +64,7 @@ for i=1:numel(recID)
     optotagging=[optotagging;thisTagging];
     mouseAge=[mouseAge;Age];
     brainArea=[brainArea;Area];
+    state=[state;State];
     
     selectedMUA=results.evokedLFP.MUA.raw(rez.ops.L4best,:);
     MUA_L4=[MUA_L4;selectedMUA];
@@ -76,7 +82,11 @@ for i=1:numel(recID)
     SB_L4_duration=[SB_L4_duration;mean(results.baseline.spindleBurst.duration)];
     SB_L4_frequency=[SB_L4_frequency;numel(results.baseline.spindleBurst.amplitude)/results.baseline.durationBaseline];
     
+    PSD = [PSD; results.baseline.spectral.LFP_PSD]; 
+    
     if isfield(results,'SalB')
+    if isfield(results.SalB.baseline,'durationBaseline')
+
         selectedMUA_K=results.SalB.evokedLFP.MUA.raw(rez.ops.L4best,:);
         MUA_L4_K=[MUA_L4_K;selectedMUA_K];
         MUA_L4_peakFast_K=[MUA_L4_peakFast_K;max(selectedMUA_K(results.SalB.evokedLFP.MUA.bins>0 & results.SalB.evokedLFP.MUA.bins<200))]; 
@@ -90,8 +100,11 @@ for i=1:numel(recID)
         LFP_L4_latency_K=[LFP_L4_latency_K;results.SalB.evokedLFP.LFP.timeVEP];
 
         SB_L4_power_K=[SB_L4_power_K;mean(results.SalB.baseline.spindleBurst.amplitude)];
-        SB_L4_duration_K=[SB_L4_duration_K;mean(results.SalB.baseline.spindleBurst.amplitude)];
+        SB_L4_duration_K=[SB_L4_duration_K;mean(results.SalB.baseline.spindleBurst.duration)];
         SB_L4_frequency_K=[SB_L4_frequency_K;numel(results.SalB.baseline.spindleBurst.amplitude)/results.baseline.durationBaseline];
+        
+        PSD_K=[PSD_K; results.SalB.baseline.spectral.LFP_PSD];
+
     else
         MUA_L4_K=[MUA_L4_K;nan(1,2000)];
         MUA_L4_peakFast_K=[MUA_L4_peakFast_K;nan(1,1)]; 
@@ -107,6 +120,27 @@ for i=1:numel(recID)
         SB_L4_power_K=[SB_L4_power_K;nan(1,1)];
         SB_L4_duration_K=[SB_L4_duration_K;nan(1,1)];
         SB_L4_frequency_K=[SB_L4_frequency_K;nan(1,1)];
+        
+        PSD_K=[PSD_K; nan(size(results.baseline.spectral.LFP_PSD))];
+
+    end
+    else
+        MUA_L4_K=[MUA_L4_K;nan(1,2000)];
+        MUA_L4_peakFast_K=[MUA_L4_peakFast_K;nan(1,1)]; 
+        MUA_L4_peakSlow_K=[MUA_L4_peakSlow_K;nan(1,1)]; 
+
+        MUA_L4_baselineFiring_K=[MUA_L4_baselineFiring_K;nan(1,1)];
+        MUA_L4_continuity_K=[MUA_L4_continuity_K;nan(1,1)];
+
+        LFP_L4_onset_K=[LFP_L4_onset_K;nan(1,1)];
+        LFP_L4_peak_K=[LFP_L4_peak_K;nan(1,1)];
+        LFP_L4_latency_K=[LFP_L4_latency_K;nan(1,1)];
+
+        SB_L4_power_K=[SB_L4_power_K;nan(1,1)];
+        SB_L4_duration_K=[SB_L4_duration_K;nan(1,1)];
+        SB_L4_frequency_K=[SB_L4_frequency_K;nan(1,1)];
+        
+        PSD_K=[PSD_K; nan(size(results.baseline.spectral.LFP_PSD))];
     end
 end
 
@@ -115,6 +149,8 @@ data=table;
 data.MouseID=categorical(cellstr(mouseID));
 data.Tagging=categorical(cellstr(optotagging));
 data.brainArea=categorical(cellstr(brainArea));
+data.state=categorical(cellstr(state));
+
 data.mouseAge=mouseAge;
 
 data.MUA_L4_peakFast=MUA_L4_peakFast;
@@ -127,6 +163,7 @@ data.LFP_L4_latency=LFP_L4_latency;
 data.SB_L4_power=SB_L4_power;
 data.SB_L4_duration=SB_L4_duration;
 data.SB_L4_frequency=SB_L4_frequency;
+data.PSD=PSD;
 
 data.MUA_L4_peakFast_K=MUA_L4_peakFast_K;
 data.MUA_L4_peakSlow_K=MUA_L4_peakSlow_K;
@@ -138,10 +175,12 @@ data.LFP_L4_latency_K=LFP_L4_latency_K;
 data.SB_L4_power_K=SB_L4_power_K;
 data.SB_L4_duration_K=SB_L4_duration_K;
 data.SB_L4_frequency_K=SB_L4_frequency_K;
+data.PSD_K=PSD_K;
 
 data.MUA_L4=MUA_L4;
 data.MUA_L4_K=MUA_L4_K;
 
 PSTHbins=results.evokedLFP.MUA.bins;
+PSD_f=results.baseline.spectral.LFP_PSD_f;
 %% Save
-save('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\LFPData.mat', 'data', 'PSTHbins')
+save('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\LFPData.mat', 'data', 'PSTHbins','PSD_f')

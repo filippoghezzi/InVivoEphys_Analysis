@@ -9,7 +9,7 @@ function s=InVivo_dataProcessing_singleUnits(s,ops,stim)
     %% Obtain simple information about single units
     s.suage=ones(numel(s.suid),1)*ops.age;
     s=InVivo_dataProcessing_singleUnits_findLayerDepth(s,ops);        
-    s=InVivo_dataProcessing_singleUnits_getTemplateFeatures(s,ops,1,ops.dirOUT);
+    s=InVivo_dataProcessing_singleUnits_getTemplateFeatures(s,ops);
 
     %% Run PSTH analysis
     s = InVivo_dataProcessing_singleUnits_getPSTHbyCondition (s,stim,ops,ops.verbose);

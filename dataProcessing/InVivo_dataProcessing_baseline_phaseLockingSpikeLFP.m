@@ -1,4 +1,4 @@
-function phaseLocking=InVivo_dataProcessing_baseline_phaseLockingSpikeLFP(ops,s,varargin)
+function phaseLocking=InVivo_dataProcessing_baseline_phaseLockingSpikeLFP(ops,s,LFP,baseline,varargin)
 % Provide spike LFP phase coupling analysis for single units. 
 % Wrapper for getPPC function. See there for details.
 
@@ -13,32 +13,17 @@ function phaseLocking=InVivo_dataProcessing_baseline_phaseLockingSpikeLFP(ops,s,
     p=inputParser;
     addRequired(p,'ops',@(x) isstruct(x));
     addRequired(p,'s', @(x) isstruct(x));
-
-    addOptional(p,'LFP', [], @(x) isnumeric(x));
-    addOptional(p,'endBaseline', [], @(x) isnumeric(x));
+    addRequired(p,'LFP', @(x) isnumeric(x));
+    addRequired(p,'baseline', @(x) isnumeric(x));
     addOptional(p,'Plotting', 0, @(x) isnumeric(x));
 
-    parse(p,ops,s,varargin{:});
-    
-    ops=p.Results.ops;
+    parse(p,ops,s,LFP,baseline,varargin{:});
     plotFlag=p.Results.Plotting;
-    if ~isempty(p.Results.endBaseline)
-        endBaseline=p.Results.endBaseline; 
-    else
-        endBaseline=ops.nSamplesBlocks(1); %Samples
-        if endBaseline > 30*60*ops.fs; endBaseline = 30*60*ops.fs; end %Select only first 30 min of baseline recording if longer
-    end
-    
-    if ~isempty(p.Results.LFP)
-        LFP=p.Results.LFP;
-    else
-        LFP = loadLFP(ops.fbinary,1,ops.fs,ops.NchanTOT,[0 endBaseline/ops.fs]);  
-    end
-    
+
     fprintf(strcat('Obtaining spike-LFP phase locking (PPC)...','\n'))
     %% Initialize variable  
-    spikeTimes=s.st(s.st<size(LFP,2));
-    spikeClu=s.sclu(s.st<size(LFP,2));
+    spikeTimes=s.st(s.st>baseline(1) & s.st<baseline(2))-baseline(1);
+    spikeClu=s.sclu(s.st>baseline(1) & s.st<baseline(2));
     frequencyBins=[1, 5; 10, 30; 50, 80];
     PPC=nan(numel(s.suid),size(frequencyBins,1));
     vectorLength=nan(numel(s.suid),size(frequencyBins,1));

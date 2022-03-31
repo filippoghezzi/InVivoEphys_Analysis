@@ -1,4 +1,4 @@
-function response=getUnitResponsiveness(raster,condition)
+function [response,reliability,FanoFactor]=getUnitResponsiveness(raster,condition)
 %   function response=findVisualResponsiveUnits(raster)
 %   
 %   To determine if a cell is responsive, t-test or anova or kruskalwallis test
@@ -20,12 +20,12 @@ function response=getUnitResponsiveness(raster,condition)
     
     if strcmp(condition,'Visual') || strcmp(condition,'VisualOpto') || strcmp(condition,'Visual_K')
         baselineWindow=[-100,0];
-        targetWindow=[(0:100:1900)'+1,(100:100:2000)'];
+        targetWindow=[0,100;100,200];
 %         baseline=@(x) nnz(x>-100&x<0);
 %         on=@(x) nnz(x>0&x<100);
 %         off=@(x) nnz(x>200&x<300);
 %         late=@(x) nnz(x>800&x<900);
-        cutoff=0;
+        cutoff=0.2;
         
     elseif strcmp(condition,'WhiskerStim') || strcmp(condition,'WhiskerStim_K') 
         baselineWindow=[-100,-50];
@@ -44,8 +44,8 @@ function response=getUnitResponsiveness(raster,condition)
         cutoff=0.2;
 
     elseif strcmp(condition,'LaserOnly')
-        baselineWindow=[-250,-50];
-        targetWindow=[-50,150;150,350];
+        baselineWindow=[-150,-50];
+        targetWindow=[-50,50; 150, 250];
 %         baseline=@(x) nnz(x>-250&x<-50);
 %         on=@(x) nnz(x>-50&x<150);
 %         off=@(x) nnz(x>150&x<350);
@@ -75,9 +75,15 @@ function response=getUnitResponsiveness(raster,condition)
         elseif size(sumSpikes,2) > 2
             response(suIdx,:)=doAnova(sumSpikes,0.05,cutoff);
         end
-        
+        reliability(suIdx)=nnz(sum(sumSpikes(:,2:end),2))/size(raster,2);
+        FanoFactor(suIdx)=fanoFactor(sum(sumSpikes(:,2:end),2)); 
     end
     
+    if ~strcmp(condition,'LaserOnly')
+        tmpResponse=double(any(response,2));
+        tmpResponse(response(:,1)==2)=2;
+        response=tmpResponse;
+    end
 end
 
 
@@ -116,7 +122,7 @@ function outcome=doAnova(data,alpha,cutoff)
 
         for i=1:size(data,2)-1
             if c(i,6) <= alpha            
-                if sum(data(:,i+1)) > sum(data(:,1)) && sum(data(:,i+1)) > size(data,1)*cutoff 
+                if sum(data(:,i+1)) > sum(data(:,1)) && nnz(data(:,i+1)) > size(data,1)*cutoff 
                     outcome(1,i)=1;
                 elseif sum(data(:,i+1)) < sum(data(:,1))
                     outcome(1,i)=2;
@@ -135,4 +141,8 @@ function h=checkNormality(data)
         h(group)=lillietest(data(:,group));
     end
     if sum(h)==0; h=false; else; h=true; end
+end
+
+function F=fanoFactor(x)
+    F = var(x)/mean(x);
 end
