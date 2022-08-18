@@ -1,15 +1,17 @@
 clear 
 clc
-close all
+% close all
 
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis')) 
 addpath('C:\Users\Butt Lab\Documents\MATLAB\Add-Ons\CircStat2012a')
 
-recordings=readtable('V1_InVivo.csv');
+recordings=readtable('G:\Nesta_Spikesorting\NH_InVivo_RED.csv');
+% recordings=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo.csv');
+
 recordings=recordings(~isnan(recordings.Sorting),:);
 
 recID=unique(recordings.MouseID);
-% recID={'NK32'};
+recID={'SC82'};
 
 for i=1:numel(recID)
     fprintf(strcat('Looking into ...',recID{i},'\n'))
@@ -31,7 +33,7 @@ for i=1:numel(recID)
     
     %% Select stimuli
     if strcmp(mouseData.BrainArea{1},'S1BF')
-        stimControl=stim.whiskerStim;
+        stimControl=stim.whisk;
         if ops.SalB; stimChemo=stim.whiskerStim_SalB; end
         ops.brainArea='S1BF';
     elseif strcmp(mouseData.BrainArea{1},'V1')
@@ -39,8 +41,8 @@ for i=1:numel(recID)
         if ops.SalB; stimChemo=stim.ledR_SalB; end
         ops.brainArea='V1';
     end
-
-%     %% Analyse Stimulus Evoked Field Potential  
+    
+    %% Analyse Stimulus Evoked Field Potential  
 %     [results.evokedLFP, ops]=InVivo_dataProcessing_evokedLFP(ops,s,stimControl,'Control');
 %     rez.ops=ops;
 %     save(fullfile(dir,'rez.mat'),'rez')

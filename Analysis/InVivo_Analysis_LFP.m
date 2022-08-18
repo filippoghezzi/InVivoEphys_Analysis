@@ -9,13 +9,13 @@ folderFigures='C:\Users\Butt Lab\OneDrive - OnTheHub - The University of Oxford\
 
 %% Set group logic arrays
 data=data(data.state=='Urethane',:);
-data=data(data.brainArea=='V1',:);
+data=data(data.brainArea=='S1BF',:);
 data=data(data.Tagging~='SST;NrgKO',:);
-data(data.MouseID=='NTV10',:)=[];
-data(data.MouseID=='NTV24',:)=[];
-data(data.MouseID=='NK14',:)=[];
-data(data.MouseID=='NK15',:)=[];
-data(data.MouseID=='SC35',:)=[];
+% data(data.MouseID=='NTV10',:)=[];
+% data(data.MouseID=='NTV24',:)=[];
+% data(data.MouseID=='NK14',:)=[];
+% data(data.MouseID=='NK15',:)=[];
+% data(data.MouseID=='SC35',:)=[];
 
 %Age
 P5P8=data.mouseAge<9;
@@ -26,17 +26,21 @@ Dev(P5P8,1)='P5-P8';
 Dev(P9P13,1)='P9-P13';
 Dev(P14P18,1)='P14-P18';
 
-data.PPC=data.MUA_L4_peakSlow./data.MUA_L4_peakFast;
-data.PPC_K=data.MUA_L4_peakSlow_K./data.MUA_L4_peakFast_K;
+data.PPR=data.MUA_L4_peakSlow./data.MUA_L4_peakFast;
+data.PPR_K=data.MUA_L4_peakSlow_K./data.MUA_L4_peakFast_K;
 
-%% PSD plots
+    %% PSD plots
 figure('units','normalized','outerposition',[0 0 0.2 1])
 
 ax(1) = subplot(3,1,1);
 plot(PSD_f,data.PSD(data.MouseID=='SC101b',:),'k','LineWidth',1)
+hold on
+plot(PSD_f,data.PSD(data.MouseID=='SC99b',:),'r','LineWidth',1)
 
 ax(2) = subplot(3,1,2);
 plot(PSD_f,data.PSD(data.MouseID=='NK32',:),'k','LineWidth',1)
+hold on
+plot(PSD_f,data.PSD(data.MouseID=='SC99b',:),'r','LineWidth',1)
 
 ax(3) = subplot(3,1,3);
 plot(PSD_f,data.PSD(data.MouseID=='SC46',:),'k','LineWidth',1)
@@ -535,7 +539,8 @@ ax(3).YAxis.Label.String='SB frequency change (ratio log2)';
 for i=1:numel(ax)
     ax(i).XLim=[-0.5,7.5];
     ax(i).FontSize=10;
-    ax(i).YLim=[-2,2];
+    ax(i).YLim=[-3,3];
+    ax(i).XTick=[0.5,3.5,6.5];
 end
 print(gcf, '-dpdf', fullfile(folderFigures,'4.19','SB_log2Ratio'))
 close 
@@ -584,24 +589,26 @@ ax(3).YAxis.Label.String='MUA L4 baseline change (ratio log2)';
 for i=1:numel(ax)
     ax(i).XLim=[-0.5,7.5];
     ax(i).FontSize=10;
-    ax(i).YLim=[-2,2];
+    ax(i).YLim=[-3,3];
+    ax(i).XTick=[0.5,3.5,6.5];
 end
+
 print(gcf, '-dpdf', fullfile(folderFigures,'4.19','MUA_log2Ratio'))
 close 
 
 figure('units','normalized','outerposition',[0 0 0.15 1]);
 ax(1)=subplot(3,1,1);
 hold on
-plot(ones(height(data(KORD&P5P8,:)),1)*0,log2(data.PPC_K(KORD&P5P8)./data.PPC(KORD&P5P8)),'o','Color',[150,150,150]/255)
-errorbar(0.2,mean(log2(data.PPC_K(KORD&P5P8)./data.PPC(KORD&P5P8)),'omitnan'),sem(log2(data.PPC_K(KORD&P5P8)./data.PPC(KORD&P5P8))),'ko','Linewidth',1,'CapSize',10)
-plot(ones(height(data(KORD&P9P13,:)),1)*3,log2(data.PPC_K(KORD&P9P13)./data.PPC(KORD&P9P13)),'o','Color',[150,150,150]/255)
-errorbar(3.2,mean(log2(data.PPC_K(KORD&P9P13)./data.PPC(KORD&P9P13)),'omitnan'),sem(log2(data.PPC_K(KORD&P9P13)./data.PPC(KORD&P9P13))),'ko','Linewidth',1,'CapSize',10)
-plot(ones(height(data(KORD&P14P18,:)),1)*6,log2(data.PPC_K(KORD&P14P18)./data.PPC(KORD&P14P18)),'o','Color',[150,150,150]/255)
-errorbar(6.2,mean(log2(data.PPC_K(KORD&P14P18)./data.PPC(KORD&P14P18)),'omitnan'),sem(log2(data.PPC_K(KORD&P14P18)./data.PPC(KORD&P14P18))),'ko','Linewidth',1,'CapSize',10)
-plot(ones(height(data(Saline&P9P13,:)),1)*4,log2(data.PPC_K(Saline&P9P13)./data.PPC(Saline&P9P13)),'o','Color',[150,150,150]/255)
-errorbar(4.2,mean(log2(data.PPC_K(Saline&P9P13)./data.PPC(Saline&P9P13)),'omitnan'),sem(log2(data.PPC_K(Saline&P9P13)./data.PPC(Saline&P9P13))),'go','Linewidth',1,'CapSize',10)
+plot(ones(height(data(KORD&P5P8,:)),1)*0,log2(data.PPR_K(KORD&P5P8)./data.PPR(KORD&P5P8)),'o','Color',[150,150,150]/255)
+errorbar(0.2,mean(log2(data.PPC_K(KORD&P5P8)./data.PPR(KORD&P5P8)),'omitnan'),sem(log2(data.PPR_K(KORD&P5P8)./data.PPR(KORD&P5P8))),'ko','Linewidth',1,'CapSize',10)
+plot(ones(height(data(KORD&P9P13,:)),1)*3,log2(data.PPR_K(KORD&P9P13)./data.PPR(KORD&P9P13)),'o','Color',[150,150,150]/255)
+errorbar(3.2,mean(log2(data.PPC_K(KORD&P9P13)./data.PPR(KORD&P9P13)),'omitnan'),sem(log2(data.PPR_K(KORD&P9P13)./data.PPR(KORD&P9P13))),'ko','Linewidth',1,'CapSize',10)
+plot(ones(height(data(KORD&P14P18,:)),1)*6,log2(data.PPR_K(KORD&P14P18)./data.PPR(KORD&P14P18)),'o','Color',[150,150,150]/255)
+errorbar(6.2,mean(log2(data.PPC_K(KORD&P14P18)./data.PPR(KORD&P14P18)),'omitnan'),sem(log2(data.PPR_K(KORD&P14P18)./data.PPR(KORD&P14P18))),'ko','Linewidth',1,'CapSize',10)
+plot(ones(height(data(Saline&P9P13,:)),1)*4,log2(data.PPR_K(Saline&P9P13)./data.PPR(Saline&P9P13)),'o','Color',[150,150,150]/255)
+errorbar(4.2,mean(log2(data.PPC_K(Saline&P9P13)./data.PPR(Saline&P9P13)),'omitnan'),sem(log2(data.PPR_K(Saline&P9P13)./data.PPR(Saline&P9P13))),'go','Linewidth',1,'CapSize',10)
 plot([-1,8],[0,0],'k--','LineWidth',0.75)
-ax(1).YAxis.Label.String='PPC (ratio log2)';
+ax(1).YAxis.Label.String='PPR (ratio log2)';
 
 ax(2)=subplot(3,1,2);
 hold on
@@ -632,27 +639,41 @@ ax(3).YAxis.Label.String='LFP L4 latency  change (ratio log2)';
 for i=1:numel(ax)
     ax(i).XLim=[-0.5,7.5];
     ax(i).FontSize=10;
-    ax(i).YLim=[-2,2];
+    ax(i).YLim=[-3,3];
+    ax(i).XTick=[0.5,3.5,6.5];
 end
 print(gcf, '-dpdf', fullfile(folderFigures,'4.19','LFP_PPC_log2Ratio'))
 close 
 
 figure('units','normalized','outerposition',[0 0 1 1]);
 subplot(3,2,1)
+hold on
 plot(PSTHbins, data.MUA_L4(data.MouseID=='K51',:),'k')
+plot([0,0],[0,500],'r')
+plot([500 500],[0,500],'r')
+
 title('Control - P5-P8')
 ylim([0 200])
 subplot(3,2,2)
+hold on
 plot(PSTHbins, data.MUA_L4_K(data.MouseID=='K51',:),'k')
+plot([0,0],[0,500],'r')
+plot([500 500],[0,500],'r')
 title('KORD - P5-P8')
 ylim([0 200])
 
 subplot(3,2,3)
+hold on
 plot(PSTHbins, data.MUA_L4(data.MouseID=='K55',:),'k')
+plot([0,0],[0,500],'r')
+plot([500 500],[0,500],'r')
 title('Control - P9-P13')
 ylim([0 450])
 subplot(3,2,4)
+hold on
 plot(PSTHbins, data.MUA_L4_K(data.MouseID=='K55',:),'k')
+plot([0,0],[0,500],'r')
+plot([500 500],[0,500],'r')
 title('KORD - P9-P13')
 ylim([0 450])
 
@@ -669,3 +690,85 @@ close
 % errorbar([-1,0],[mean(data.PPC(KORD&P14P18),'omitnan'),mean(data.PPC_K(KORD&P14P18),'omitnan')],[sem(data.PPC(KORD&P14P18)),sem(data.PPC_K(KORD&P14P18))],'k-o','Linewidth',1,'CapSize',10)
 % ax(1).YAxis.Label.String='PPC';
 % ax(1).Title.String = 'KORD';
+
+%% Awake
+P9=data.mouseAge<14;
+aw=data.state=='Awake';
+ur=data.state=='Urethane';
+
+figure('units','normalized','outerposition',[0 0 0.2 1])
+
+ax(1)=subplot(3,1,1);
+v(1,:)=violinplot(maxBetaPSD(P9), data.state(P9));
+ax(1).YLabel.String='Max \beta normalised power';
+[h,p,stats] = my_ttest2 (maxBetaPSD(P9&aw),maxBetaPSD(P9&ur))
+
+
+ax(2)=subplot(3,1,2);
+v(2,:)=violinplot(data.SB_L4_duration(P9), data.state(P9));
+ax(2).YLabel.String='Spindle burst duration (s)';
+[h,p,stats] = my_ttest2 (data.SB_L4_duration(P9&aw),data.SB_L4_duration(P9&ur))
+
+ax(3)=subplot(3,1,3);
+v(3,:)=violinplot(data.SB_L4_frequency(P9), data.state(P9));
+ax(3).YLabel.String='Spindle burst occurrence (Hz)';
+[h,p,stats] = my_ttest2 (data.SB_L4_frequency(P9&aw),data.SB_L4_frequency(P9&ur))
+
+color = [200,200,200;20,20,20];
+
+for i=1:numel(ax)
+    for j=1:size(v,2)
+        v(i,j).ViolinColor=color(j,:)/255;
+        v(i,j).ScatterPlot.MarkerFaceColor=[37,37,37]/255;
+        v(i,j).ScatterPlot.MarkerFaceAlpha=1;
+        v(i,j).ScatterPlot.SizeData=10;
+    end
+
+    ax(i).FontSize=12;
+    ax(i).LineWidth=1;
+    ax(i).XLim=[0.5,2.5];
+end
+
+print(gcf, '-dpdf', fullfile(folderFigures,'4.21','PSD_SB_violin'))
+% close
+
+figure('units','normalized','outerposition',[0 0 0.2 1])
+
+ax(1)=subplot(3,1,1);
+v(1,:)=violinplot(data.MUA_L4_peakFast(P9), data.state(P9));
+ax(1).YLabel.String='Max L4 MUA fast (spikes/s)';
+[h,p,stats] = my_ttest2 (data.MUA_L4_peakFast(P9&aw),data.MUA_L4_peakFast(P9&ur))
+
+
+ax(2)=subplot(3,1,2);
+v(2,:)=violinplot(data.MUA_L4_baselineFiring(P9), data.state(P9));
+ax(2).YLabel.String='Spontaneous L4 MUA (spike/s)';
+[h,p,stats] = my_ttest2 (data.MUA_L4_baselineFiring(P9&aw),data.MUA_L4_baselineFiring(P9&ur))
+
+ax(3)=subplot(3,1,3);
+v(3,:)=violinplot(data.MUA_L4_peakSlow(P9), data.state(P9));
+ax(3).YLabel.String='Max L4 MUA slow (spikes/s)';
+[h,p,stats] = my_ttest2 (data.MUA_L4_peakSlow(P9&aw),data.MUA_L4_peakSlow(P9&ur))
+
+color = [200,200,200;20,20,20];
+
+for i=1:numel(ax)
+    for j=1:size(v,2)
+        v(i,j).ViolinColor=color(j,:)/255;
+        v(i,j).ScatterPlot.MarkerFaceColor=[37,37,37]/255;
+        v(i,j).ScatterPlot.MarkerFaceAlpha=1;
+        v(i,j).ScatterPlot.SizeData=10;
+    end
+
+    ax(i).FontSize=12;
+    ax(i).LineWidth=1;
+    ax(i).XLim=[0.5,2.5];
+end
+
+print(gcf, '-dpdf', fullfile(folderFigures,'4.21','MUA_violin'))
+% close
+
+figure
+hold on
+plot(mean(data.MUA_L4(ur,:)),'k')
+plot(mean(data.MUA_L4(aw,:)),'r')

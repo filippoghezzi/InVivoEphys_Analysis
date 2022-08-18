@@ -42,8 +42,8 @@ function baseline_struct=InVivo_dataProcessing_baseline(ops,s,baseline_struct,va
     
     % Select only L4 best channel for next analysis
     LFP=LFP(ops.L4best,:);
-    baseline_struct.spectral = InVivo_dataProcessing_baseline_powerSpectrum(ops,s,'LFP',LFP,'BaselineWindow',[startBaseline, endBaseline],'Plotting',1);
-%     baseline_struct.spindleBurst = InVivo_dataProcessing_baseline_spindleBurst(ops,s,LFP,[startBaseline, endBaseline],'Plotting',1);
+%     baseline_struct.spectral = InVivo_dataProcessing_baseline_powerSpectrum(ops,s,'LFP',LFP,'BaselineWindow',[startBaseline, endBaseline],'Plotting',1);
+    baseline_struct.spindleBurst = InVivo_dataProcessing_baseline_spindleBurst(ops,s,LFP,[startBaseline, endBaseline],'Plotting',1);
     
 end
 

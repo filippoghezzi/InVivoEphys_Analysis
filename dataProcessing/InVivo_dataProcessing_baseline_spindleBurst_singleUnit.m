@@ -1,4 +1,4 @@
-function spindleBurst = InVivo_dataProcessing_baseline_spindleBurst_singleUnit(spindleBurst,s,baseline,folder)
+function spindleBurst = InVivo_dataProcessing_baseline_spindleBurst_singleUnit(spindleBurst,s,baseline,fs,folder)
 % function spindleBurst = InVivo_dataProcessing_baseline_spindleBurst_singleUnit(spindleBurst,s,endBaseline,folder)
 % Analyse entrainment of single units spiking with spindle bursts. Outputs 
 % the probability of spikes occurring within spindle bursts over total 
@@ -17,7 +17,8 @@ function spindleBurst = InVivo_dataProcessing_baseline_spindleBurst_singleUnit(s
     spikeLatency_norm=cell(numel(s.suid),1);
     unitEntrained=zeros(numel(s.suid),1);
     unitEntrained_p=nan(numel(s.suid),1);
-    
+    spikeFrequency=nan(numel(s.suid),1);
+
     %% Main analysis
     figure('units','normalized','outerposition',[0 0 1 1]);
     for su=1:numel(s.suid)  
@@ -25,8 +26,8 @@ function spindleBurst = InVivo_dataProcessing_baseline_spindleBurst_singleUnit(s
         singleUnitSpikeTimes=double(s.st(s.sclu==s.suid(su)));
         singleUnitSpikeTimes=singleUnitSpikeTimes(singleUnitSpikeTimes>baseline(1) & singleUnitSpikeTimes<baseline(2));
         if numel(singleUnitSpikeTimes)>0
-            [spikeProbability(su),spikeLatency{su},spikeLatency_norm{su}]=getBurstSpikeProb(spindleBurst,singleUnitSpikeTimes);
-            [unitEntrained(su),unitEntrained_p(su)]=getBurstUnitEntrained(spindleBurst,singleUnitSpikeTimes,spikeProbability(su));
+            [spikeProbability(su),spikeLatency{su},spikeLatency_norm{su},spikeFrequency(su)]=getBurstSpikeProb(spindleBurst,singleUnitSpikeTimes,fs);
+            [unitEntrained(su),unitEntrained_p(su)]=getBurstUnitEntrained(spindleBurst,singleUnitSpikeTimes,spikeProbability(su),fs);
         end
     end  
     export_fig(fullfile(folder,'SpindleBurstEntrainment'),'-tiff','-transparent')
@@ -38,10 +39,11 @@ function spindleBurst = InVivo_dataProcessing_baseline_spindleBurst_singleUnit(s
     spindleBurst.spikeProbability=spikeProbability;
     spindleBurst.spikeLatency=spikeLatency;
     spindleBurst.spikeLatency_norm=spikeLatency_norm;
+    spindleBurst.firingFrequency=spikeFrequency;
 end
 
 
-function [spikeProbability,spikeLatency,spikeLatency_norm]=getBurstSpikeProb(SB,spiketimes)
+function [spikeProbability,spikeLatency,spikeLatency_norm,spikeFrequency]=getBurstSpikeProb(SB,spiketimes,fs)
 % Measure ratio between the number of spikes within spindle bursts and
 % total spikes in baseline (spikeProbability). Records also the latency of
 % spikes within each spindle bursts as raw latency(spikeLatency) or
@@ -57,11 +59,13 @@ function [spikeProbability,spikeLatency,spikeLatency_norm]=getBurstSpikeProb(SB,
         spikeTimesThisBurst=spiketimes_aligned(spiketimes_aligned>0 & spiketimes_aligned<nSampleBurst(burst));
         spikeLatency=[spikeLatency;spikeTimesThisBurst];
         spikeLatency_norm=[spikeLatency_norm;spikeTimesThisBurst/nSampleBurst(burst)];
+        spikeCount(burst)=numel(spikeTimesThisBurst);
     end
     spikeProbability=numel(spikeLatency)./totSpikesBaseline;
+    spikeFrequency = mean(spikeCount./(nSampleBurst./fs));
 end
 
-function [unitEntrained,p]=getBurstUnitEntrained(SB,spiketimes,true_spikeProbability)
+function [unitEntrained,p]=getBurstUnitEntrained(SB,spiketimes,true_spikeProbability,fs)
 % Perform statistical test for entrainment of single units within bursts
 % using an ISI shuffling method (Narayanan, N. S., & Laubach, M. (2009). 
 % Methods for studying functional interactions among neuronal populations. 
@@ -76,7 +80,7 @@ function [unitEntrained,p]=getBurstUnitEntrained(SB,spiketimes,true_spikeProbabi
     for i=1:1000
         shuffledISI=ISI(randperm(length(ISI)));
         shuffledSpikeTimes=cumsum([spiketimes(1);shuffledISI]);
-        [shuffled_spikeProbability(i),~,~]=getBurstSpikeProb(SB,shuffledSpikeTimes);
+        [shuffled_spikeProbability(i),~,~,~]=getBurstSpikeProb(SB,shuffledSpikeTimes,fs);
     end
     p=nnz(shuffled_spikeProbability>=true_spikeProbability)/1000;
     if p<0.001; unitEntrained=1; else; unitEntrained=0; end

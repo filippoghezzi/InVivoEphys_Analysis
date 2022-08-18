@@ -3,7 +3,7 @@ clear
 clc
 
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis')) 
-load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData.mat')
+load('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\FG_SingleUnitData.mat')
 folderFigures='C:\Users\Butt Lab\OneDrive - OnTheHub - The University of Oxford\University of Oxford\WT Doctoral Programme in Neuroscience\DPhil in Neuroscience\DPhil thesis\Figures\Chapter 4';
 
 %% Set group logic arrays
@@ -112,6 +112,7 @@ data.peakVisualSlow_Change(data.peakVisualSlow_Change==-Inf | data.peakVisualSlo
 data.sbSpikeProb_Change(data.sbSpikeProb_Change==-Inf | data.sbSpikeProb_Change==+Inf)=NaN; 
 data.PPC_Change(data.PPC_Change==-Inf | data.PPC_Change==+Inf)=NaN; 
 data.baseline_Change(data.baseline_Change==-Inf | data.baseline_Change==+Inf)=NaN; 
+data.vectorAngle = wrapTo360(rad2deg(data.vectorAngle));
 
 %% Single Units identity v1
 %P14-P18
@@ -254,8 +255,8 @@ ax.GridColor=[0,0,0]/255;
 ax.GridLineStyle=':';
 ax.Title.String='Pre eye opening';
 
-export_fig(fullfile(folderFigures,'4.4','WF_scatter_v2'),'-pdf','-transparent','-nocrop')
-close
+% export_fig(fullfile(folderFigures,'4.4','WF_scatter_v2'),'-pdf','-transparent','-nocrop')
+% close
 
 
 %% Extract waveforms
@@ -556,55 +557,155 @@ data.cellIdentity(SST)=categorical(cellstr('SST'));
 
 if ~(nnz(FS)+nnz(RS)+nnz(Nkx_FS)+nnz(Nkx_RS)+nnz(SST)+nnz(Nkx_y)==height(data)); error('Problem with cell identity'); end
 
+%% Units spike feature vs. depth
+%P14-P18
+figure('units','normalized','outerposition',[0 0 1 0.7]);
+ax=subplot(1,8,5);
+[value,edges]=histcounts(data.Depth(FS),-650:50:350);
+h1=barh(edges(1:end-1),value,'LineWidth',1,'EdgeColor','none','FaceColor',[217,217,217]/255);
+set(get(h1,'Parent'),'xdir','r')
+ylim([-650 350])
+xlim([0,30])
+ax.YLabel.String='Relative depth (\mum)';
+ax.XLabel.String='Cell #';
+ax.FontSize=20;
+ax.Box='off';
+ax.LineWidth = 1.5;
+grid
+ax.GridLineStyle=':';
+ax.GridColor=[0,0,0]/255;
+
+ax=subplot(1,8,1);
+[value,edges]=histcounts(data.Depth(RS),-650:50:350);
+h2=barh(edges(1:end-1),value,'LineWidth',1,'EdgeColor','none','FaceColor',[115,115,115]/255);
+set(get(h2,'Parent'),'xdir','r')
+ylim([-650 350])
+xlim([0,250])
+ax.YLabel.String='Relative depth (\mum)';
+ax.XLabel.String='Cell #';
+ax.FontSize=20;
+ax.Box='off';
+ax.LineWidth = 1.5;
+grid
+ax.GridLineStyle=':';
+ax.GridColor=[0,0,0]/255;
+
+ax=subplot(1,8,(6:8));
+hold on
+plot(data.troughPeakTime(FS),data.Depth(FS),'LineStyle','none','Marker','o', 'MarkerSize',5,'MarkerFaceColor',[217,217,217]/255,'MarkerEdgeColor','none')
+plot(data.troughPeakTime(Nkx),data.Depth(Nkx),'LineStyle','none','Marker','o','MarkerSize',6, 'MarkerFaceColor',[215,48,39]/255,'MarkerEdgeColor','none')
+plot(data.troughPeakTime(SST),data.Depth(SST),'LineStyle','none','Marker','o','MarkerSize',6, 'MarkerFaceColor',[69,117,180]/255,'MarkerEdgeColor','none')
+xlim([0 2.5])
+ylim([-650 350])
+ax.XLabel.String='Trough to Peak Latency (ms)';
+% ax.YLabel.String='Trough to Peak Latency (ms)';
+ax.FontSize=20;
+ax.Box='off';
+ax.LineWidth = 1.5;
+ax.YAxis.Visible='off';
+% ax.Color=[247,247,247]/255;
+grid
+ax.GridColor=[0,0,0]/255;
+ax.GridLineStyle=':';
+ax.Title.String='GABAergic interneurons';
+legend('FS','Nkx2-1','SST')
+
+
+ax=subplot(1,8,(2:4));
+hold on
+plot(data.troughPeakTime(RS),data.Depth(RS),'LineStyle','none','Marker','o', 'MarkerSize',5,'MarkerFaceColor',[217,217,217]/255,'MarkerEdgeColor','none','HandleVisibility','off')
+xlim([0 2.5])
+ylim([-650 350])
+ax.XLabel.String='Trough to Peak Latency (ms)';
+% ax.YLabel.String='Trough to Peak Latency (ms)';
+ax.FontSize=20;
+ax.Box='off';
+ax.LineWidth = 1.5;
+ax.YAxis.Visible='off';
+grid
+ax.GridColor=[0,0,0]/255;
+ax.GridLineStyle=':';
+ax.Title.String='RS units';
+
+export_fig(fullfile(folderFigures,'4.4','WF_depth_scatter'),'-pdf','-transparent','-nocrop')
+close
+
 %% Spindle burst entrainment RS units
-figure('units','normalized','outerposition',[0 0 0.2 1])
+clear ax v b
+figure('units','normalized','outerposition',[0 0 0.2 .7])
 ax(1)=subplot(3,2,1);
 v(1,:)=violinplot(data.sb_spikeProb(RS&P9P13&SB_entrained),data.Layer(RS&P9P13&SB_entrained));
 ax(1).YLim=[0, 1];
+ax(1).YLabel.String = 'SB spike probability';
 
 ax(2)=subplot(3,2,2);
 v(2,:)=violinplot(data.sb_spikeProb(RS&P14P18&SB_entrained),data.Layer(RS&P14P18&SB_entrained));
 ax(2).YLim=[0, 1];
-
-swtest(data.sb_spikeProb(RS&SB_entrained&P9P13))
-[p,tbl,stats]=kruskalwallis(data.sb_spikeProb(RS&SB_entrained&P9P13),data.Layer(RS&SB_entrained&P9P13));
-multcompare(stats,'Dimension',[1,2],'CType' ,'dunn-sidak')
+ax(2).YLabel.String = 'SB spike probability';
 
 ax(3)=subplot(3,2,3);
-v(3,:)=violinplot(data.PPC(RS&P9P13&PPC_entrained,2),data.Layer(RS&P9P13&PPC_entrained));
-ax(3).YLim=[0, .8];
+v(3,:)=violinplot(data.vectorAngle(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx),2),data.cellIdentity(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx)));
+ax(3).YLim=[0, 360];
+ax(3).YTick = [0,90,180,270,360];
+ax(3).YGrid = 'on';
+ax(3).YLabel.String = 'Vector Angle';
 
 ax(4)=subplot(3,2,4);
-v(4,:)=violinplot(data.PPC(RS&P14P18&PPC_entrained,2),data.Layer(RS&P14P18&PPC_entrained));
-ax(4).YLim=[0, .8];
+v(4,:)=violinplot(data.vectorAngle(RS&P14P18&PPC_entrained,2),data.Layer(RS&P14P18&PPC_entrained));
+ax(4).YLim=[0, 360];
+ax(4).YTick = [0,90,180,270,360];
+ax(4).YGrid = 'on';
+ax(4).YLabel.String = 'Vector Angle';
 
-swtest(data.PPC(RS&PPC_entrained&P9P13))
-[p,tbl,stats]=kruskalwallis(data.PPC(RS&PPC_entrained&P9P13),data.Layer(RS&PPC_entrained&P9P13));
-multcompare(stats,'Dimension',[1,2],'CType' ,'dunn-sidak')
-
+% swtest(wrapTo360(rad2deg(data.vectorAngle(RS&PPC_entrained&P9P13))))
+% [p,tbl,stats]=kruskalwallis(data.vectorAngle(RS&P9P13&PPC_entrained,2),data.Layer(RS&P9P13&PPC_entrained));
+% multcompare(stats,'Dimension',[1,2],'CType' ,'dunn-sidak')
 ax(5)=subplot(3,2,5);
-v(5,:)=violinplot(wrapTo360(rad2deg(data.vectorAngle(RS&P9P13&PPC_entrained,2))),data.Layer(RS&P9P13&PPC_entrained));
-ax(5).YLim=[0, 360];
+b(1,:)=boxchart(data.Layer(RS&P9P13&PPC_entrained),data.PPC(RS&P9P13&PPC_entrained,2),'MarkerStyle','none');
+ax(5).YLim=[0, 0.4];
+ax(5).YLabel.String = 'PPC';
+% ax(5).YScale = 'log';
 
 ax(6)=subplot(3,2,6);
-v(6,:)=violinplot(wrapTo360(rad2deg(data.vectorAngle(RS&P14P18&PPC_entrained,2))),data.Layer(RS&P14P18&PPC_entrained));
-ax(6).YLim=[0, 360];
+b(2,:)=boxchart(data.Layer(RS&P14P18&PPC_entrained),data.PPC(RS&P14P18&PPC_entrained,2),'MarkerStyle','none');
+ax(6).YLim=[0, .4];
+ax(6).YLabel.String = 'PPC';
 
 for i=1:numel(ax)
-    for j=1:size(v,2)
-        v(i,j).ViolinColor=[100,100,100]/255;
-        v(i,j).ScatterPlot.MarkerFaceColor=[37,37,37]/255;
-        v(i,j).ScatterPlot.MarkerFaceAlpha=1;
-        v(i,j).ScatterPlot.SizeData=2;
+    if ismember(i,[1:4])
+        for j=1:size(v,2)
+            v(i,j).ViolinColor=[100,100,100]/255;
+            v(i,j).ScatterPlot.MarkerFaceColor=[37,37,37]/255;
+            v(i,j).ScatterPlot.MarkerFaceAlpha=1;
+            v(i,j).ScatterPlot.SizeData=2;
+        end
+    ax(i).XLim=[0.5,3.5];
     end
-
+    
+  
     ax(i).FontSize=12;
     ax(i).LineWidth=1;
-    ax(i).XLim=[0.5,3.5];
     
 end
-
 print(gcf,'-dpdf',fullfile(folderFigures,'4.6','PPC_SB_violin'))
+close
+
+clear ax
+figure('units','normalized','outerposition',[0 0 0.2 1])
+subplot(3,2,1)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(RS&P9P13&PPC_entrained&L23,2))),data.vectorLength(RS&P9P13&PPC_entrained&L23,2),'g.')
+subplot(3,2,3)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(RS&P9P13&PPC_entrained&L4,2))),data.vectorLength(RS&P9P13&PPC_entrained&L4,2),'k.')
+subplot(3,2,5)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(RS&P9P13&PPC_entrained&L56,2))),data.vectorLength(RS&P9P13&PPC_entrained&L56,2),'m.')
+subplot(3,2,2)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(RS&P14P18&PPC_entrained&L23,2))),data.vectorLength(RS&P14P18&PPC_entrained&L23,2),'g.')
+subplot(3,2,4)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(RS&P14P18&PPC_entrained&L4,2))),data.vectorLength(RS&P14P18&PPC_entrained&L4,2),'k.')
+subplot(3,2,6)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(RS&P14P18&PPC_entrained&L56,2))),data.vectorLength(RS&P14P18&PPC_entrained&L56,2),'m.')
+
+print(gcf,'-dpdf',fullfile(folderFigures,'4.6','polarscatterplots_RS'))
 close
 
 clear ax
@@ -613,6 +714,10 @@ ySB=[nnz(SB_entrained&L23&P9P13)/nnz(L23&P9P13),nnz(SB_entrained&L4&P9P13)/nnz(L
     nnz(SB_entrained&L23&P14P18)/nnz(L23&P14P18),nnz(SB_entrained&L4&P14P18)/nnz(L4&P14P18),nnz(SB_entrained&L56&P14P18)/nnz(L56&P14P18)];
 yPPC=[nnz(PPC_entrained&L23&P9P13)/nnz(L23&P9P13),nnz(PPC_entrained&L4&P9P13)/nnz(L4&P9P13),nnz(PPC_entrained&L56&P9P13)/nnz(L56&P9P13);...
     nnz(PPC_entrained&L23&P14P18)/nnz(L23&P14P18),nnz(PPC_entrained&L4&P14P18)/nnz(L4&P14P18),nnz(PPC_entrained&L56&P14P18)/nnz(L56&P14P18)];
+
+yPPC=[nnz(PPC_entrained&L23&P9P13)/nnz(L23&P9P13),nnz(PPC_entrained&L4&P9P13)/nnz(L4&P9P13),nnz(PPC_entrained&L56&P9P13)/nnz(L56&P9P13);...
+    nnz(PPC_entrained&L23&P14P18)/nnz(L23&P14P18),nnz(PPC_entrained&L4&P14P18)/nnz(L4&P14P18),nnz(PPC_entrained&L56&P14P18)/nnz(L56&P14P18)];
+
 xDev=reordercats(categorical(cellstr({'P9-P13','P14-P18'})),{'P9-P13','P14-P18'});
 
 ax(1)=subplot(3,1,1);
@@ -677,17 +782,18 @@ close
 clear ax
 figure('units','normalized','outerposition',[0 0 0.2 1])
 
-ySB=[nnz(responsive&L23&P9P13&RS)/nnz(L23&P9P13&RS),nnz(responsive&L4&P9P13&RS)/nnz(L4&P9P13&RS),nnz(responsive&L56&P9P13&RS)/nnz(L56&P9P13&RS);...
-    nnz(responsive&L23&P14P18&RS)/nnz(L23&P14P18&RS),nnz(responsive&L4&P14P18&RS)/nnz(L4&P14P18&RS),nnz(responsive&L56&P14P18&RS)/nnz(L56&P14P18&RS)];
-yPPC=[nnz(data.rw_responsive&L23&P9P13&RS)/nnz(L23&P9P13&RS),nnz(data.rw_responsive&L4&P9P13&RS)/nnz(L4&P9P13&RS),nnz(data.rw_responsive&L56&P9P13&RS)/nnz(L56&P9P13&RS);...
+yfast=[nnz(responsive&L23&P9P13&RS)/nnz(L23&P9P13&RS),nnz(responsive&L4&P9P13&RS)/nnz(L4&P9P13&RS),nnz(responsive&L56&P9P13&RS)/nnz(L56&P9P13&RS);...
+    nnz(data.rw_responsive&L23&P9P13&RS)/nnz(L23&P9P13&RS),nnz(data.rw_responsive&L4&P9P13&RS)/nnz(L4&P9P13&RS),nnz(data.rw_responsive&L56&P9P13&RS)/nnz(L56&P9P13&RS)];
+yslow=[nnz(responsive&L23&P14P18&RS)/nnz(L23&P14P18&RS),nnz(responsive&L4&P14P18&RS)/nnz(L4&P14P18&RS),nnz(responsive&L56&P14P18&RS)/nnz(L56&P14P18&RS);...
     nnz(data.rw_responsive&L23&P14P18&RS)/nnz(L23&P14P18&RS),nnz(data.rw_responsive&L4&P14P18&RS)/nnz(L4&P14P18&RS),nnz(data.rw_responsive&L56&P14P18&RS)/nnz(L56&P14P18&RS)];
-xDev=reordercats(categorical(cellstr({'P9-P13','P14-P18'})),{'P9-P13','P14-P18'});
+
+xDev=categorical (cellstr({'Fast','Slow'}));
 
 ax(1)=subplot(3,1,1);
-b(1,:)=bar(xDev,ySB);
+b(1,:)=bar(xDev,yfast);
 
 ax(2)=subplot(3,1,2);
-b(2,:)=bar(xDev,yPPC);
+b(2,:)=bar(xDev,yslow);
 
 for i=1:numel(ax)
     ax(i).YLabel.String='Ratio single units responsive';
@@ -699,8 +805,9 @@ for i=1:numel(ax)
     for j=1:size(b,2)
         b(i,j).LineWidth=1;
     end
+    ax(i).YLim=[0,1];
 end
-export_fig(fullfile(folderFigures,'4.7','responsiveFastSlow_bar'),'-pdf','-transparent','-nocrop')
+export_fig('C:\Users\Butt Lab\OneDrive - OnTheHub - The University of Oxford\University of Oxford\WT Doctoral Programme in Neuroscience\DPhil in Neuroscience\Manuscripts\V1 S1\Figures\Fig. 3\RS_Responsive_BarPlot.pdf','-pdf','-transparent','-nocrop')
 close
     
 
@@ -1374,7 +1481,7 @@ if c~=0
 end
 
 %RS young
-subset=data(resp & RS & P9P13,:);
+subset=data(resp & RS & P9P13&L4,:);
 c=0;
 f=0;
 for i=1:height(subset)
@@ -2208,7 +2315,7 @@ ax.YLim=[0,1];
 legend('Rebound excited','Non-responsive')
 legend('boxoff')
 
-export_fig(fullfile(folderFigures,'4.11b','Rebound_BarPlot'),'-pdf','-transparent','-nocrop')
+export_fig(fullfile(folderFigures,'4.13','Rebound_BarPlot'),'-pdf','-transparent','-nocrop')
 close
 
 
@@ -2247,7 +2354,7 @@ for i=1:numel(ax)
     ax(i).YLim=ylims(i,:);
 end
 
-export_fig(fullfile(folderFigures,'4.11b','Rebound_ErrorPlotSST'),'-pdf','-transparent','-nocrop')
+export_fig(fullfile(folderFigures,'4.13','Rebound_ErrorPlotSST'),'-pdf','-transparent','-nocrop')
 close
 [h,p,stats] = my_ttest(data.optoBaseline(RS&P9P13&L23&SSTopto),data.optoRebound(RS&P9P13&L23&SSTopto))
 [h,p,stats] = my_ttest(data.optoBaseline(RS&P14P18&L23&SSTopto),data.optoRebound(RS&P14P18&L23&SSTopto))
@@ -2291,7 +2398,7 @@ for i=1:numel(ax)
     ax(i).FontSize=10;
     ax(i).YLim=ylims(i,:);
 end
-export_fig(fullfile(folderFigures,'4.11b','Rebound_ErrorPlotNkx'),'-pdf','-transparent','-nocrop')
+export_fig(fullfile(folderFigures,'4.13','Rebound_ErrorPlotNkx'),'-pdf','-transparent','-nocrop')
 close
 
 [h,p,stats] = my_ttest(data.optoBaseline(RS&P9P13&L23&Nkxopto),data.optoRebound(RS&P9P13&L23&Nkxopto))
@@ -2449,15 +2556,15 @@ ax(1)=subplot(3,1,1);
 hold on
 plot(-3,data.optoChange(RS&P9P13&L23&Nkxopto),'o','Color',[150,150,150]/255)
 errorbar(-3+0.2,mean(data.optoChange(RS&P9P13&L23&Nkxopto),'omitnan'),sem(data.optoChange(RS&P9P13&L23&Nkxopto)),'ko','Linewidth',1,'CapSize',10)
-[h,p,stats]=my_ttest(data.optoChange(RS&P9P13&L23&Nkxopto));     
+[h,p,stats]=my_ttest(data.optoChange(RS&P9P13&L23&Nkxopto))   
 
 plot(-2,data.optoChange(RS&P9P13&L4&Nkxopto),'o','Color',[150,150,150]/255)
 errorbar(-2+0.2,mean(data.optoChange(RS&P9P13&L4&Nkxopto),'omitnan'),sem(data.optoChange(RS&P9P13&L4&Nkxopto)),'ko','Linewidth',1,'CapSize',10)
-[h,p,stats]=my_ttest(data.optoChange(RS&P9P13&L4&Nkxopto));
+[h,p,stats]=my_ttest(data.optoChange(RS&P9P13&L4&Nkxopto))
 
 plot(-1,data.optoChange(RS&P9P13&L56&Nkxopto),'o','Color',[150,150,150]/255)
 errorbar(-1+0.2,mean(data.optoChange(RS&P9P13&L56&Nkxopto),'omitnan'),sem(data.optoChange(RS&P9P13&L56&Nkxopto)),'ko','Linewidth',1,'CapSize',10)
-[h,p,stats]=my_ttest(data.optoChange(RS&P9P13&L56&Nkxopto));
+[h,p,stats]=my_ttest(data.optoChange(RS&P9P13&L56&Nkxopto))
 
 plot(1,data.optoChange(RS&P14P18&L23&Nkxopto),'o','Color',[150,150,150]/255)
 errorbar(1+0.2,mean(data.optoChange(RS&P14P18&L23&Nkxopto),'omitnan'),sem(data.optoChange(RS&P14P18&L23&Nkxopto)),'ko','Linewidth',1,'CapSize',10)
@@ -3019,6 +3126,15 @@ for i=1:numel(ax)
 end
 export_fig(fullfile(folderFigures,'4.18','Errorbar RSvsFS'),'-pdf','-transparent','-nocrop')
 close
+
+
+ax(2)=subplot(4,2,2);
+hold on
+plot([-3,-2],[data.baseline_firing(KORD&P9P13),data.baseline_firing_K(KORD&P9P13)],'-','Color',[150,150,150]/255)
+errorbar([-3,-2],[mean(data.baseline_firing(KORD&P9P13),'omitnan'),mean(data.baseline_firing_K(KORD&P9P13),'omitnan')],[sem(data.baseline_firing(KORD&P9P13)),sem(data.baseline_firing_K(KORD&P9P13))],'k-o','Linewidth',1,'CapSize',10)
+plot([-1,0],[data.baseline_firing(KORD&P14P18),data.baseline_firing_K(KORD&P14P18)],'-','Color',[150,150,150]/255)
+errorbar([-1,0],[mean(data.baseline_firing(KORD&P14P18),'omitnan'),mean(data.baseline_firing_K(KORD&P14P18),'omitnan')],[sem(data.baseline_firing(KORD&P14P18)),sem(data.baseline_firing_K(KORD&P14P18))],'k-o','Linewidth',1,'CapSize',10)
+
 %% Bar plot spindle bursts
 % SST
 figure('units','normalized','outerposition',[0 0 0.2 1]);
@@ -3061,11 +3177,11 @@ close
 %%
 data.cellIdentity(Nkx)=categorical(cellstr('Nkx2-1'));
 clear v ax
-figure('units','normalized','outerposition',[0 0 0.2 1])
+figure('units','normalized','outerposition',[0 0 0.2 0.7])
 ax(1)=subplot(3,2,1);
 v(1,:)=violinplot(data.sb_spikeProb(SB_entrained&P9P13&(SST|Nkx)), removecats(data.cellIdentity(SB_entrained&P9P13&(SST|Nkx))));
 ax(1).YLim=[0, 1];
-[h,p,ci,stats] = ttest2(data.sb_spikeProb(SST&SB_entrained&P9P13),data.sb_spikeProb(Nkx&SB_entrained&P9P13));
+% [h,p,ci,stats] = ttest2(data.sb_spikeProb(SST&SB_entrained&P9P13),data.sb_spikeProb(Nkx&SB_entrained&P9P13));
 
 ax(2)=subplot(3,2,2);
 v(2,:)=violinplot(data.sb_spikeProb(SB_entrained&P14P18&(SST|Nkx)), removecats(data.cellIdentity(SB_entrained&P14P18&(SST|Nkx))));
@@ -3073,12 +3189,31 @@ ax(2).YLim=[0, 1];
 
 ax(3)=subplot(3,2,3);
 v(3,:)=violinplot(data.PPC((SST|Nkx)&P9P13&PPC_entrained,2), removecats(data.cellIdentity((SST|Nkx)&P9P13&PPC_entrained)));
-ax(3).YLim=[0, .8];
-[h,p,ci,stats] = ttest2(data.PPC(SST&SB_entrained&P9P13),data.PPC(Nkx&SB_entrained&P9P13));
+ax(3).YLim=[0, 1];
+
+ax(3).YScale='log';
+ax(3).YTick=[0,0.01,0.1,1];
+
+% [h,p,ci,stats] = ttest2(data.PPC(SST&SB_entrained&P9P13,2),data.PPC(Nkx&SB_entrained&P9P13,2));
 
 ax(4)=subplot(3,2,4);
 v(4,:)=violinplot(data.PPC((SST|Nkx)&P14P18&PPC_entrained,2), removecats(data.cellIdentity((SST|Nkx)&P14P18&PPC_entrained)));
 ax(4).YLim=[0, .8];
+
+
+ax(5)=subplot(3,2,5);
+v(5,:)=violinplot(data.vectorAngle((SST|Nkx)&P9P13&PPC_entrained,2), removecats(data.cellIdentity((SST|Nkx)&P9P13&PPC_entrained)));
+ax(5).YLim=[0, 360];
+% [h,p,ci,stats] = ttest2(data.PPC(SST&SB_entrained&P9P13),data.PPC(Nkx&SB_entrained&P9P13));
+ax(5).YGrid = 'on';
+ax(5).YTick=[0:90:360];
+[h,p,ci,stats] = ttest2(data.vectorAngle(SST&SB_entrained&P9P13,2),data.vectorAngle(Nkx&SB_entrained&P9P13,2));
+
+ax(6)=subplot(3,2,6);
+v(6,:)=violinplot(data.vectorAngle((SST|Nkx)&P14P18&PPC_entrained,2), removecats(data.cellIdentity((SST|Nkx)&P14P18&PPC_entrained)));
+ax(6).YLim=[0, 360];
+ax(6).YGrid = 'on';
+ax(6).YTick=[0:90:360];
 
 for i=1:numel(ax)
     for j=1:size(v,2)
@@ -3090,21 +3225,29 @@ for i=1:numel(ax)
 
     ax(i).FontSize=12;
     ax(i).LineWidth=1;
-    ax(i).XLim=[0.5,2.5];
+    ax(i).XLim=[0.5,3.5];
     
 end
 
-ax(5)=subplot(3,2,5);
-vx=violinplot(wrapTo360(rad2deg(data.vectorAngle(P9P13&PPC_entrained,2))),data.cellIdentity(P9P13&PPC_entrained));
-ax(5).YLim=[0, 360];
-
-ax(6)=subplot(3,2,6);
-vy=violinplot(wrapTo360(rad2deg(data.vectorAngle(P14P18&PPC_entrained,2))),removecats(data.cellIdentity(P14P18&PPC_entrained)));
-ax(6).YLim=[0, 360];
 
 
+print(gcf,'-dpdf',fullfile(folderFigures,'4.8','PPC_SB_violinIN'))
+close
 
-print(gcf,'-dpdf',fullfile(folderFigures,'4.8','PPC_SB_violin'))
+
+clear ax
+figure('units','normalized','outerposition',[0 0 0.2 1])
+subplot(3,2,1)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(SST&P9P13&PPC_entrained,2))),data.vectorLength(SST&P9P13&PPC_entrained,2),'b.')
+subplot(3,2,3)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(Nkx&P9P13&PPC_entrained,2))),data.vectorLength(Nkx&P9P13&PPC_entrained,2),'r.')
+
+subplot(3,2,2)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(SST&P14P18&PPC_entrained,2))),data.vectorLength(SST&P14P18&PPC_entrained,2),'b.')
+subplot(3,2,4)
+polarscatter(wrapTo360(rad2deg(data.vectorAngle(Nkx&P14P18&PPC_entrained,2))),data.vectorLength(Nkx&P14P18&PPC_entrained,2),'r.')
+
+print(gcf,'-dpdf',fullfile(folderFigures,'4.6','polarscatterplots_INs'))
 close
 
 %% Imagesc plots - All
@@ -4232,4 +4375,144 @@ for i=1:numel(ax)
     ax(i).YLim=[-2,2];
 end
 export_fig(fullfile(folderFigures,'4.20','Errorbar RSvsFS'),'-pdf','-transparent','-nocrop')
+close
+
+
+%% Plotting for paper
+data.cellIdentity(Nkx)=categorical(cellstr('Nkx2-1'));
+
+clear ax v b
+figure('units','normalized','outerposition',[0 0 0.2 .7])
+
+ax(1)=subplot(3,2,1);
+v(1,:)=violinplot(data.vectorAngle(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx),2),data.cellIdentity(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx)));
+ax(1).YLim=[0, 360];
+ax(1).YTick = [0,90,180,270,360];
+ax(1).YGrid = 'on';
+ax(1).YLabel.String = 'Vector Angle';
+
+ax(2)=subplot(3,2,2);
+v(2,:)=violinplot(data.vectorAngle(RS&P14P18&PPC_entrained,2),data.Layer(RS&P14P18&PPC_entrained));
+ax(2).YLim=[0, 360];
+ax(2).YTick = [0,90,180,270,360];
+ax(2).YGrid = 'on';
+ax(2).YLabel.String = 'Vector Angle';
+
+% swtest(wrapTo360(rad2deg(data.vectorAngle(RS&PPC_entrained&P9P13))))
+% [p,tbl,stats]=kruskalwallis(data.vectorAngle(RS&P9P13&PPC_entrained,2),data.Layer(RS&P9P13&PPC_entrained));
+% multcompare(stats,'Dimension',[1,2],'CType' ,'dunn-sidak')
+
+
+
+ax(3)=subplot(3,2,3);
+b(1,:)=boxchart(removecats(data.cellIdentity(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx))),data.PPC(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx),2),'MarkerStyle','none');
+ax(3).YLim=[0, 0.6];
+ax(3).YLabel.String = 'PPC';
+% ax(5).YScale = 'log';
+
+ax(4)=subplot(3,2,4);
+b(2,:)=boxchart(removecats(data.cellIdentity((SST|Nkx)&P14P18&PPC_entrained)),data.PPC((SST|Nkx)&P14P18&PPC_entrained,2),'MarkerStyle','none');
+ax(4).YLim=[0, .4];
+ax(4).YLabel.String = 'PPC';
+
+
+ax(5)=subplot(3,2,5);
+b(3,:)=boxchart(data.Layer(RS&P9P13&PPC_entrained),data.PPC(RS&P9P13&PPC_entrained,2),'MarkerStyle','none');
+ax(5).YLim=[0, 0.6];
+ax(5).YLabel.String = 'PPC';
+% ax(5).YScale = 'log';
+
+ax(6)=subplot(3,2,6);
+b(4,:)=boxchart(data.Layer(RS&P14P18&PPC_entrained),data.PPC(RS&P14P18&PPC_entrained,2),'MarkerStyle','none');
+ax(6).YLim=[0, .6];
+ax(6).YLabel.String = 'PPC';
+
+for i=1:numel(ax)
+    if ismember(i,[1:2])
+        for j=1:size(v,2)
+            v(i,j).ViolinColor=[100,100,100]/255;
+            v(i,j).ScatterPlot.MarkerFaceColor=[37,37,37]/255;
+            v(i,j).ScatterPlot.MarkerFaceAlpha=1;
+            v(i,j).ScatterPlot.SizeData=2;
+        end
+    ax(i).XLim=[0.5,3.5];
+    end
+    
+  
+    ax(i).FontSize=12;
+    ax(i).LineWidth=1;
+    
+end
+print(gcf,'-dpdf',fullfile('C:\Users\Butt Lab\OneDrive - OnTheHub - The University of Oxford\University of Oxford\WT Doctoral Programme in Neuroscience\DPhil in Neuroscience\Manuscripts\V1 S1\Figures\Fig. 2\V1_PPC'))
+close
+
+swtest(data.vectorAngle(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx),2))
+[p,tbl,stats]=kruskalwallis(data.vectorAngle(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx),2),removecats(data.cellIdentity(P9P13&PPC_entrained & ((RS&L4)|SST|Nkx))));
+multcompare(stats,'Dimension',[1,2],'CType' ,'dunn-sidak')
+
+
+clear ax v b
+figure('units','normalized','outerposition',[0 0 0.2 .7])
+
+ax(3)=subplot(3,2,3);
+b(1,:)=boxchart(removecats(data.cellIdentity(P9P13&SB_entrained & ((RS&L4)|SST|Nkx))),data.sb_firing(P9P13&SB_entrained & ((RS&L4)|SST|Nkx)),'MarkerStyle','none');
+ax(3).YLim=[0, 7];
+ax(3).YLabel.String = 'Firing';
+% ax(5).YScale = 'log';
+
+ax(4)=subplot(3,2,4);
+b(2,:)=boxchart(removecats(data.cellIdentity((SST|Nkx)&P14P18&SB_entrained)),data.sb_firing((SST|Nkx)&P14P18&SB_entrained),'MarkerStyle','none');
+ax(4).YLim=[0, 7];
+ax(4).YLabel.String = 'Firing';
+
+
+ax(5)=subplot(3,2,5);
+b(3,:)=boxchart(data.Layer(RS&P9P13&SB_entrained),data.sb_firing(RS&P9P13&SB_entrained),'MarkerStyle','none');
+ax(5).YLim=[0, 7];
+ax(5).YLabel.String = 'Firing';
+% ax(5).YScale = 'log';
+
+ax(6)=subplot(3,2,6);
+b(4,:)=boxchart(data.Layer(RS&P14P18&SB_entrained),data.sb_firing(RS&P14P18&SB_entrained),'MarkerStyle','none');
+ax(6).YLim=[0, 7];
+ax(6).YLabel.String = 'Firing';
+
+swtest(data.sb_firing(RS&P9P13&SB_entrained))
+[p,tbl,stats]=kruskalwallis(data.sb_firing((SST|Nkx)&P14P18&SB_entrained),data.Layer((SST|Nkx)&P14P18&SB_entrained));
+multcompare(stats,'Dimension',[1,2],'CType' ,'dunn-sidak')
+
+%% 
+clear ax b
+figure('units','normalized','outerposition',[0 0 0.2 1])
+
+yfast=[nnz(responsive&P5P8&RS)/nnz(P5P8&RS),nnz(responsive&P5P8&SST)/nnz(P5P8&SST),nnz(responsive&P5P8&Nkx)/nnz(P5P8&Nkx);...
+    nnz(responsive&P9P13&RS)/nnz(P9P13&RS),nnz(responsive&P9P13&SST)/nnz(P9P13&SST),nnz(responsive&P9P13&Nkx)/nnz(P9P13&Nkx);...
+    nnz(responsive&P14P18&RS)/nnz(P14P18&RS),nnz(responsive&P14P18&SST)/nnz(P14P18&SST),nnz(responsive&P14P18&Nkx)/nnz(P14P18&Nkx)];
+yslow=[nnz(data.rw_responsive&P5P8&RS)/nnz(P5P8&RS),nnz(data.rw_responsive&P5P8&SST)/nnz(P5P8&SST),nnz(data.rw_responsive&P5P8&Nkx)/nnz(P5P8&Nkx);...
+    nnz(data.rw_responsive&P9P13&RS)/nnz(P9P13&RS),nnz(data.rw_responsive&P9P13&SST)/nnz(P9P13&SST),nnz(data.rw_responsive&P9P13&Nkx)/nnz(P9P13&Nkx);...
+    nnz(data.rw_responsive&P14P18&RS)/nnz(P14P18&RS),nnz(data.rw_responsive&P14P18&SST)/nnz(P14P18&SST),nnz(data.rw_responsive&P14P18&Nkx)/nnz(P14P18&Nkx)];
+
+xDev=reordercats(categorical (cellstr({'P5-P8','P9-P13','P14-P18'})),{'P5-P8','P9-P13','P14-P18'});
+
+ax(1)=subplot(3,1,1);
+b(1,:)=bar(xDev,yfast);
+
+ax(2)=subplot(3,1,2);
+b(2,:)=bar(xDev,yslow);
+titles={'Fast','Slow'};
+for i=1:numel(ax)
+    ax(i).YLabel.String='Ratio single units responsive';
+    ax(i).Box='off';
+    ax(i).LineWidth = 1.5;
+    ax(i).FontSize=15;
+    ax(i).YTick=[0:0.2:1];
+    legend('RS','SST','Nkx2-1','Location','northeast')
+    legend('boxoff')
+    for j=1:size(b,2)
+        b(i,j).LineWidth=1;
+    end
+    ax(i).YLim=[0,1];
+    ax(i).Title.String=titles{i};
+end
+export_fig('C:\Users\Butt Lab\OneDrive - OnTheHub - The University of Oxford\University of Oxford\WT Doctoral Programme in Neuroscience\DPhil in Neuroscience\Manuscripts\V1 S1\Figures\Fig. 3\RS_Responsive_BarPlot.pdf','-pdf','-transparent','-nocrop')
 close

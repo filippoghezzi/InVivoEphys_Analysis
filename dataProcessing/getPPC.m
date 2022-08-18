@@ -6,7 +6,10 @@ function [PPC,vectorAngle,vectorLength,pValue,powerLFP]=getPPC(spiketimes,filtLF
 % Vector length and angle are calculated using functions from P. Berens, CircStat: A Matlab Toolbox for Circular Statistics, Journal of Statistical Software, Volume 31, Issue 10, 2009.
 % Pairwise phase consistency is measured according to Vinck et al., The pairwise phase consistency: A bias-free measure of rhythmic neuronal synchronization, NeuroImage (2010)
 % Input: spiketimes -> spike times of a single unit in samples. 
-%       filtLFP -> filtered single channel LFP signal
+%       filtLFP -> filtered single channel LFP signal (not downsampled). 
+%       LFP channels should  be selected to correspond with a channel 100 um above or below the 
+%       best channel for that unit. LFP data is aligned to spike times,
+%       where the first sample of the LFP is sample 1 in spike times
 %
 % Outputs: PPC-> numeric, paiwise phase consistency
 %          vecotrAngle -> numeric, Mean direction of a sample of circular data
@@ -52,7 +55,7 @@ function [PPC,vectorAngle,vectorLength,pValue,powerLFP]=getPPC(spiketimes,filtLF
     
     %% Plotting
     if plotting
-        circ_plot(theta','hist',[],20,true,true,'linewidth',2,'color','r');
+        circ_plot(theta','pretty',[],20,true,true,'linewidth',2,'color','r');
     end
 end    
 

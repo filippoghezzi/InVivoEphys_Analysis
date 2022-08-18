@@ -4,33 +4,38 @@ function plotRaster(raster,s,condition,varargin)
     for suIdx=1:size(raster,1)
         subplot(ceil(sqrt(size(raster,1))),ceil(sqrt(size(raster,1))),suIdx)
         for trial=1:size(raster,2)
-            scatter(raster{suIdx,trial},ones(size(raster{suIdx,trial},1),1)*trial,'.k')
+            scatter(raster{suIdx,trial}+14,(ones(size(raster{suIdx,trial},1),1)*trial)+1,'.k')
             hold on 
         end
         
         ax=gca;        
         if strcmp(condition,'Visual') || strcmp(condition,'Visual_K')      
-            patch([0 100 100 0],[0 0 size(raster,2) size(raster,2)],'y','FaceAlpha',.3,'EdgeColor','none')
-            ax.XLim=[-1000, 4000];
+%             patch([0 100 100 0],[0 0 size(raster,2) size(raster,2)],'y','FaceAlpha',.3,'EdgeColor','none')
+            ax.XLim=[-500,3000];
             
         elseif strcmp(condition,'Optotagging')
-            patch([0 50 50 0],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
+%             patch([0 50 50 0],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
             ax.XLim=[-100, 200];
         
         elseif strcmp(condition,'VisualOpto')
-            patch([0 100 100 0],[0 0 size(raster,2) size(raster,2)],'y','FaceAlpha',.3,'EdgeColor','none')
-            patch([-50 150 150 -50],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
-            ax.XLim=[-1000, 4000];
+%             patch([0 100 100 0],[0 0 size(raster,2) size(raster,2)],'y','FaceAlpha',.3,'EdgeColor','none')
+%             patch([-50 150 150 -50],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
+            ax.XLim=[-500,3000];
         
         elseif strcmp(condition,'LaserOnly')
-            patch([-50 150 150 -50],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
-            ax.XLim=[-1000, 4000];
+%             patch([-50 150 150 -50],[0 0 size(raster,2) size(raster,2)],'c','FaceAlpha',.1,'EdgeColor','none')
+            ax.XLim=[-1000, 1000];
         end
 %             ax.XLim=[-1000, 4000];
+        
+        ax.XLim=[-500,3000];
 
         hold off
         ax.YLim=[0, size(raster,2)];
         ax.YTick=[];
+        ax.XTick = [0:1000:3000];
+        ax.XTickLabel=[];
+
         ax.YAxis.Color='none'; 
         box off
         

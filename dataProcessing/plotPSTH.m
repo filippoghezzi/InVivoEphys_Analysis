@@ -22,29 +22,35 @@ function plotPSTH(s,condition,varargin)
     for suIdx=1:size(PSTH,1)
         subplot(ceil(sqrt(size(PSTH,1))),ceil(sqrt(size(PSTH,1))),suIdx)
         
-        plot(PSTHbins,PSTH(suIdx,:),'k')
+        plot(PSTHbins+14,smooth(PSTH(suIdx,:),5),'k')
         ax=gca;
         
         if strcmp(condition,'Visual') || strcmp(condition,'Visual_K')       
-            patch([0 100 100 0],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'y','FaceAlpha',.3,'EdgeColor','none')
-            ax.XLim=[-1000, 4000];
+%             patch([0 100 100 0],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'y','FaceAlpha',.3,'EdgeColor','none')
+            ax.XLim=[-500,3000];
             
         elseif strcmp(condition,'Optotagging')
             patch([0 50 50 0],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'c','FaceAlpha',.1,'EdgeColor','none')
             ax.XLim=[-100, 200];
         
         elseif strcmp(condition,'VisualOpto')
-            patch([0 100 100 0],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'y','FaceAlpha',.3,'EdgeColor','none')
-            patch([-50 150 150 -50],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'c','FaceAlpha',.1,'EdgeColor','none')
-            ax.XLim=[-1000, 4000];
+%             patch([0 100 100 0],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'y','FaceAlpha',.3,'EdgeColor','none')
+%             patch([-50 150 150 -50],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'c','FaceAlpha',.1,'EdgeColor','none')
+            ax.XLim=[-500,3000];
         
         elseif strcmp(condition,'LaserOnly')
-            patch([-50 150 150 -50],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'c','FaceAlpha',.1,'EdgeColor','none')
-            ax.XLim=[-1000, 4000];
+%             patch([-50 150 150 -50],[0 0 max(PSTH(suIdx,:)) max(PSTH(suIdx,:))],'c','FaceAlpha',.1,'EdgeColor','none')
+            ax.XLim=[-1000,1000];
         end
         
+        ax.XLim=[-500,3000];
 
-        ax.YLim=[0, 50];
+        ax.YLim=[0, 40];
+        ax.XTick=[0:1000:3000];
+        ax.XTickLabel=[0:3];
+%         ax.XAxis.Visible='off';
+        ax.YAxis.TickLength=[0,0];
+        ax.YTick=[0,40];
         hold off
         box off
         

@@ -16,9 +16,9 @@ function [results,ops]=InVivo_dataProcessing_evokedLFP(ops,s,stim,condition)
     
     [results.LFP, ops]=InVivo_dataProcessing_evokedLFP_getFeaturesLFP(eLFP,ops);
     
-    if strcmp(ops.brainArea,'V1')
+%     if strcmp(ops.brainArea,'V1')
         results.rw=InVivo_dataProcessing_evokedLFP_retinalWave(ops,s,eLFP,stim);
-    end
+%     end
     
 %     results.spectrogram=InVivo_dataProcessing_evokedLFP_spectrogram(squeeze(eLFP(ops.L4best,:,:)),ops, ops.LFPwindow);
 end

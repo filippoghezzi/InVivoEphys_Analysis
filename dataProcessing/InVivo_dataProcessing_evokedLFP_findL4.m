@@ -4,7 +4,7 @@ function ops=InVivo_dataProcessing_evokedLFP_findL4(eLFP,CSD,MUA,ops)
     
     meanLFP=mean(eLFP,3);
     time=(-ops.fs*ops.LFPwindow(1):ops.fs*ops.LFPwindow(2));
-    time=time/ops.fs*1000;
+    time=(time/ops.fs*1000)+14;
     if ops.age<10
         spacingLFP=200;
         csdXlim=650;
@@ -81,7 +81,7 @@ function ops=InVivo_dataProcessing_evokedLFP_findL4(eLFP,CSD,MUA,ops)
     if maxMUA==0
         maxMUA=1;    
     end
-    imagesc(MUA.bins,(1:size(MUA.raw,1)),MUA.raw,[min(MUA.raw(:))/2,maxMUA]);
+    imagesc(MUA.bins+14,(1:size(MUA.raw,1)),MUA.raw,[min(MUA.raw(:))/2,maxMUA]);
     xlim([-50 300])
     colormap(ax_mua,'hot')
     ax_mua.XLabel.String='Time (ms)';
@@ -132,7 +132,7 @@ function ops=InVivo_dataProcessing_evokedLFP_findL4(eLFP,CSD,MUA,ops)
         % Re-plot interpolated CSD
         ax_csd=subplot(1,3,2);
         imagesc(time,(1:size(CSD.interp,1)),CSD.interp,[min(CSD.interp(:))/5,max(CSD.interp(:))/5]);
-        ax_csd.XLim=[-50 1000];
+        ax_csd.XLim=[-50 500];
         colormap(flipud(jet));    
         ax_csd.XLabel.String='Time (ms)';
         ax_csd.YLabel.String='Depth (\mum)';
@@ -147,7 +147,7 @@ function ops=InVivo_dataProcessing_evokedLFP_findL4(eLFP,CSD,MUA,ops)
             text(-45,max(L4channelsToPlot)*size(CSD.interp,1)/ops.NchanTOT-50,'L4','FontSize',20)
         end
 
-
+        
         ax_csd.Box='off';
         ax_csd.LineWidth = 1.5;
         ax_csd.FontSize=20;

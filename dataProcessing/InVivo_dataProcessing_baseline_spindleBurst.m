@@ -38,7 +38,7 @@ function spindleBurst=InVivo_dataProcessing_baseline_spindleBurst(ops,s,LFP,base
     spindleBurst=InVivo_dataProcessing_baseline_spindleBurst_BurstFeatures(envelope,ops.fs,threshold,filt_LFP);  
     spindleBurst.start=spindleBurst.start+baseline(1);
     spindleBurst.end=spindleBurst.end+baseline(1);
-    spindleBurst=InVivo_dataProcessing_baseline_spindleBurst_singleUnit(spindleBurst,s,baseline,ops.dirOUT);
+    spindleBurst=InVivo_dataProcessing_baseline_spindleBurst_singleUnit(spindleBurst,s,baseline,ops.fs,ops.dirOUT);
     
 %     %% Plotting
 %     if plotFlag

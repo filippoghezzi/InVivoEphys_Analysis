@@ -34,7 +34,7 @@ function s = InVivo_dataProcessing_singleUnits_getPSTHbyCondition(s,stim,ops,ver
                 if verbose; plotPSTH(s,conditions{cond},ops.dirOUT); end
             
             case 'WhiskerStim'
-                stimulus=stim.whiskerStim(:,1);
+                stimulus=stim.whisk(:,1);
                 artefactRemoval=[];
                 [s.PSTHwhisker,s.PSTHbins,raster]=getPSTHbyUnit(s,stimulus,ops.fs,rasterWindow,binSize,artefactRemoval);
                 [s.response.whisker,s.reliability.whisker,s.fano.whisker]=getUnitResponsiveness(raster,conditions{cond});

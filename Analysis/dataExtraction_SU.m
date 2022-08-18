@@ -4,7 +4,8 @@ clc
 
 addpath(genpath('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis')) 
 
-recordings=readtable('V1_InVivo.csv');
+recordings=readtable('G:\Nesta_Spikesorting\NH_InVivo_RED.csv');
+% recordings=readtable('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\V1_InVivo.csv');
 recordings=recordings(~isnan(recordings.Sorting),:);
 recID=unique(recordings.MouseID);
 % recID={'NK58','NSC1','NSC2','NSC4','NSC5','SC55','SC56','SC91','SC92b','SC93b','SC107l','SC107u'};
@@ -73,8 +74,10 @@ baseline_firing_K=[];
 
 sb_spikeProb=[];
 sb_entrainedP=[];
+sb_firing=[];
 sb_spikeProb_K=[];
 sb_entrainedP_K=[];
+sb_firing_K=[];
 
 coherence_K=[];
 
@@ -251,9 +254,11 @@ for i=1:numel(recID)
         if size(results.baseline.spindleBurst.spikeProbability,1)==1
             sb_spikeProb=[sb_spikeProb;results.baseline.spindleBurst.spikeProbability'];
             sb_entrainedP=[sb_entrainedP;results.baseline.spindleBurst.unitEntrained_p'];
+            sb_firing=[sb_firing;results.baseline.spindleBurst.firingFrequency'];
         else
             sb_spikeProb=[sb_spikeProb;results.baseline.spindleBurst.spikeProbability];
             sb_entrainedP=[sb_entrainedP;results.baseline.spindleBurst.unitEntrained_p];
+            sb_firing=[sb_firing;results.baseline.spindleBurst.firingFrequency];
         end
         
         %% Chemogenetic
@@ -301,9 +306,11 @@ for i=1:numel(recID)
             if size(results.SalB.baseline.spindleBurst.spikeProbability,1)==1
                 sb_spikeProb_K=[sb_spikeProb_K;results.SalB.baseline.spindleBurst.spikeProbability'];
                 sb_entrainedP_K=[sb_entrainedP_K;results.SalB.baseline.spindleBurst.unitEntrained_p'];
+                sb_firing_K=[sb_firing_K;results.SalB.baseline.spindleBurst.firingFrequency'];
             else
                 sb_spikeProb_K=[sb_spikeProb_K;results.SalB.baseline.spindleBurst.spikeProbability];
                 sb_entrainedP_K=[sb_entrainedP_K;results.SalB.baseline.spindleBurst.unitEntrained_p];
+                sb_firing_K=[sb_firing_K;results.SalB.baseline.spindleBurst.firingFrequency];
             end
             
             
@@ -319,6 +326,7 @@ for i=1:numel(recID)
         baseline_firing_K=[baseline_firing_K;nan(numel(results.s.suid),1)];
         sb_spikeProb_K=[sb_spikeProb_K;nan(numel(results.s.suid),1)];
         sb_entrainedP_K=[sb_entrainedP_K;nan(numel(results.s.suid),1)];
+        sb_firing_K=[sb_firing_K;nan(numel(results.s.suid),1)];
     end
         else
         baseline_PPC_K=[baseline_PPC_K;nan(numel(results.s.suid),3)];
@@ -331,7 +339,8 @@ for i=1:numel(recID)
         rw_rho_K=[rw_rho_K;nan(numel(results.s.suid),16)];
         baseline_firing_K=[baseline_firing_K;nan(numel(results.s.suid),1)];
         sb_spikeProb_K=[sb_spikeProb_K;nan(numel(results.s.suid),1)];
-        sb_entrainedP_K=[sb_entrainedP_K;nan(numel(results.s.suid),1)];    
+        sb_entrainedP_K=[sb_entrainedP_K;nan(numel(results.s.suid),1)];
+        sb_firing_K=[sb_firing_K;nan(numel(results.s.suid),1)];
     end
 end
 
@@ -392,6 +401,7 @@ data.rw_rho=rw_rho;
 data.baseline_firing=baseline_firing;
 data.sb_spikeProb=sb_spikeProb;
 data.sb_entrainedP=sb_entrainedP;
+data.sb_firing=sb_firing;
 
 data.PSTHvisual_K=PSTHvisualK;
 data.responseVisual_K=responseVisualK;
@@ -409,6 +419,7 @@ data.rw_rho_K=rw_rho_K;
 data.baseline_firing_K=baseline_firing_K;
 data.sb_spikeProb_K=sb_spikeProb_K;
 data.sb_entrainedP_K=sb_entrainedP_K;
+data.sb_firing_K=sb_firing_K;
 
 %% Save
-save('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\SingleUnitData.mat', 'data', 'PSTHbins', 'rwFreq')
+save('C:\Users\Butt Lab\Documents\GitHub\InVivoEphys_Analysis\NH_SingleUnitData.mat', 'data', 'PSTHbins', 'rwFreq')
